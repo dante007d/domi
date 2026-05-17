@@ -211,8 +211,8 @@ export class Game {
             
             this.chests.push(new Chest(this.renderer.scene, this.maze, {x: rx, y: ry}, false));
             
-            // Fake Chests - dynamic scaling count with level for increased difficulty
-            const fakeCount = 3 + config.id; 
+            // Fake Chests - set to exactly 4 for a total of 5 chests per level
+            const fakeCount = 4; 
             for(let i=0; i<fakeCount; i++) {
                 let fx, fy;
                 do {

@@ -598,7 +598,7 @@
         if (typeof io !== 'undefined') {
             const socketUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
                 ? 'http://localhost:3002'
-                : (localStorage.getItem('BACKEND_URL') || 'https://dominos-effect-production.up.railway.app');
+                : (localStorage.getItem('BACKEND_URL') || 'https://dominos-effect-f.up.railway.app');
             this.socket = io(socketUrl);
             this.socket.emit('join_game', { teamName: this.teamName, teamId: this.teamId });
         }

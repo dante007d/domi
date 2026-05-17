@@ -586,7 +586,7 @@
       },
 
       init() {
-        const savedTeam = localStorage.getItem('blockly_session');
+        const savedTeam = sessionStorage.getItem('blockly_session');
         if (savedTeam) {
             const { name, id } = JSON.parse(savedTeam);
             this.teamId = id;

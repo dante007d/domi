@@ -228,7 +228,7 @@ export class Game {
         });
 
         this.socket.on('session_reset', () => {
-            localStorage.removeItem('blockly_session');
+            sessionStorage.removeItem('blockly_session');
             window.location.reload();
         });
         
@@ -236,7 +236,7 @@ export class Game {
         this.setupUI();
         
         // Session Persistence
-        const savedTeam = localStorage.getItem('blockly_session');
+        const savedTeam = sessionStorage.getItem('blockly_session');
         if (savedTeam) {
             const { name, id } = JSON.parse(savedTeam);
             this.teamId = id;
@@ -293,7 +293,7 @@ export class Game {
 
             if (code === '69692839') { 
                 this.teamId = 'TEAM-' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem('blockly_session', JSON.stringify({ name: teamName, id: this.teamId }));
+                sessionStorage.setItem('blockly_session', JSON.stringify({ name: teamName, id: this.teamId }));
 
                 this.teamName = teamName;
                 const teamSpan = document.getElementById('current-team');

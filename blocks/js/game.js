@@ -19,7 +19,7 @@ function getSocket() {
     }
     if (gameSocket) return gameSocket;
     
-    const savedTeam = localStorage.getItem('blockly_session');
+    const savedTeam = sessionStorage.getItem('blockly_session');
     if (savedTeam) {
         try {
             const session = JSON.parse(savedTeam);

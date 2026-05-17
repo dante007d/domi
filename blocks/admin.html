@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOMINO'S EFFECT | COMMAND CENTER</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --doom-red: #ff3300;
+            --accent-blue: #00aaff;
+            --accent-green: #33ff33;
+            --text-main: #e0e0e0;
+            --panel-bg: rgba(20, 20, 20, 0.95);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Share Tech Mono', monospace;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Login Overlay */
+        #auth-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-dark);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .auth-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2rem;
+            color: var(--doom-red);
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px var(--doom-red);
+        }
+
+        .auth-input {
+            background: #000;
+            border: 2px solid var(--doom-red);
+            color: var(--doom-red);
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.5rem;
+            padding: 15px;
+            text-align: center;
+            width: 300px;
+            margin-bottom: 1rem;
+            outline: none;
+        }
+
+        .auth-btn {
+            background: var(--doom-red);
+            color: #000;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            padding: 15px 30px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .auth-btn:hover {
+            box-shadow: 0 0 20px var(--doom-red);
+            transform: scale(1.05);
+        }
+
+        .hidden { display: none !important; }
+
+        /* Main Dashboard */
+        header {
+            background: #111;
+            border-bottom: 2px solid var(--doom-red);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2rem;
+            color: var(--doom-red);
+        }
+
+        .room-code {
+            font-size: 1.5rem;
+            color: var(--accent-blue);
+            background: #222;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 1px;
+            background: #222;
+        }
+
+        .teams-panel {
+            background: var(--bg-dark);
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .controls-panel {
+            background: #111;
+            padding: 2rem;
+            border-left: 2px solid #333;
+        }
+
+        .section-title {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .team-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 1.5rem;
+            border-radius: 4px;
+            transition: border-color 0.3s;
+        }
+
+        .team-card:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .team-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .team-name {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9rem;
+            color: var(--text-main);
+        }
+
+        .team-level {
+            color: var(--accent-green);
+            font-weight: bold;
+        }
+
+        .team-stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #333;
+        }
+
+        .stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            color: var(--text-main);
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 0.8rem;
+            margin-top: 1rem;
+            background: transparent;
+            border: 1px solid var(--doom-red);
+            color: var(--doom-red);
+            font-family: 'Share Tech Mono', monospace;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: var(--doom-red);
+            color: #000;
+        }
+
+        .global-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .big-btn {
+            padding: 1.5rem;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-start { background: var(--accent-green); color: #000; }
+        .btn-reset { background: var(--doom-red); color: #000; }
+
+        .big-btn:hover {
+            filter: brightness(1.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 2000;
+        }
+        .leaderboard-panel {
+            background: #111;
+            padding: 2rem;
+            margin-top: 1rem;
+            border-top: 2px solid #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        th {
+            text-align: left;
+            color: #888;
+            padding: 1rem;
+            border-bottom: 1px solid #333;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #222;
+            color: var(--text-main);
+        }
+
+        .rank-gold { color: #ffd700; font-weight: bold; }
+        .rank-silver { color: #c0c0c0; }
+        .rank-bronze { color: #cd7f32; }
+        .tab-nav {
+            display: flex;
+            background: #111;
+            border-bottom: 2px solid #333;
+            padding: 0 2rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: #666;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            padding: 1.5rem 2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            color: var(--doom-red);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--doom-red);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 2rem;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="scanlines"></div>
+
+    <div id="auth-overlay">
+        <h1 class="auth-title">ADMIN OVERRIDE</h1>
+        <p style="color: #666; margin-bottom: 1rem;">SECURE ACCESS ONLY</p>
+        <input type="password" id="admin-pass" class="auth-input" placeholder="••••••">
+        <button id="btn-auth" class="auth-btn">AUTHORIZE</button>
+        <p id="auth-error" class="hidden" style="color: var(--doom-red); margin-top: 1rem;">ACCESS DENIED</p>
+    </div>
+
+    <header>
+        <div class="logo">DOMINO'S EFFECT COMMAND</div>
+        <div class="room-code" id="display-room-code">WAITING...</div>
+    </header>
+
+    <div class="tab-nav">
+        <button class="tab-btn active" data-tab="tab-command">COMMAND</button>
+        <button class="tab-btn" data-tab="tab-leaderboard">LEADERBOARD</button>
+    </div>
+
+    <main>
+        <section class="teams-panel">
+            <div id="tab-command" class="tab-content active">
+                <h2 class="section-title">Active Operatives</h2>
+                <div id="team-grid" class="team-grid">
+                    <p style="color: #444;">No teams connected.</p>
+                </div>
+            </div>
+
+            <div id="tab-leaderboard" class="tab-content">
+                <h2 class="section-title">Global Standings</h2>
+                <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center;">
+                    <input type="text" id="leaderboard-search" placeholder="SEARCH OPERATIVES..." style="flex: 1; min-width: 200px; background: #000; border: 1px solid var(--doom-red); color: var(--doom-red); padding: 10px; font-family: 'Share Tech Mono', monospace; outline: none; font-size: 1rem;">
+                    <label style="cursor: pointer; color: #888; display: flex; align-items: center; gap: 5px; font-family: 'Share Tech Mono'; user-select: none;">
+                        <input type="checkbox" id="filter-active" style="accent-color: var(--doom-red);"> ACTIVE ONLY
+                    </label>
+                </div>
+                <table id="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th id="th-rank" style="cursor: pointer; user-select: none; color: var(--doom-red);">Rank <span class="sort-icon">▲</span></th>
+                            <th id="th-name" style="cursor: pointer; user-select: none;">Team Name <span class="sort-icon"></span></th>
+                            <th id="th-level" style="cursor: pointer; user-select: none;">Level <span class="sort-icon"></span></th>
+                            <th id="th-time" style="cursor: pointer; user-select: none;">Uplink Time <span class="sort-icon"></span></th>
+                            <th id="th-failures" style="cursor: pointer; user-select: none;">Failures <span class="sort-icon"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <!-- Rankings injected here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="controls-panel">
+            <h2 class="section-title">Mission Control</h2>
+            <div class="global-actions">
+                <button class="big-btn btn-start" id="btn-start-mission">START MISSION</button>
+                <button class="big-btn btn-reset" id="btn-reset-session">RESET SESSION</button>
+            </div>
+
+            <div style="margin-top: 3rem;">
+                <h2 class="section-title">Server Status</h2>
+                <div id="server-status" style="color: var(--accent-green);">● ONLINE</div>
+                <div id="connection-count" style="margin-top: 0.5rem; color: #888;">0 Connections</div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script type="module">
+        const authOverlay = document.getElementById('auth-overlay');
+        const authInput = document.getElementById('admin-pass');
+        const authBtn = document.getElementById('btn-auth');
+        const authError = document.getElementById('auth-error');
+
+        const attemptAuth = () => {
+            if (authInput.value === '586203') {
+                authOverlay.classList.add('hidden');
+                initDashboard();
+            } else {
+                authError.classList.remove('hidden');
+                setTimeout(() => authError.classList.add('hidden'), 2000);
+            }
+        };
+
+        authBtn.onclick = attemptAuth;
+        authInput.onkeydown = (e) => { if(e.key === 'Enter') attemptAuth(); };
+
+        let socket;
+        let lastState = null;
+        let currentSortField = 'rank';
+        let currentSortOrder = 'asc';
+
+        window.setSort = (field) => {
+            if (currentSortField === field) {
+                currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortField = field;
+                currentSortOrder = (field === 'level' || field === 'failures') ? 'desc' : 'asc';
+            }
+            updateTableHeaderIcons();
+        };
+
+        function updateTableHeaderIcons() {
+            const headers = {
+                'rank': 'th-rank',
+                'name': 'th-name',
+                'level': 'th-level',
+                'time': 'th-time',
+                'failures': 'th-failures'
+            };
+            Object.keys(headers).forEach(key => {
+                const el = document.getElementById(headers[key]);
+                if (el) {
+                    el.style.color = (key === currentSortField) ? 'var(--doom-red)' : '';
+                    const icon = el.querySelector('.sort-icon');
+                    if (icon) {
+                        if (key === currentSortField) {
+                            icon.innerText = currentSortOrder === 'asc' ? ' ▲' : ' ▼';
+                        } else {
+                            icon.innerText = '';
+                        }
+                    }
+                }
+            });
+        }
+
+        function initDashboard() {
+            socket = io('http://localhost:3002');
+
+            // Tab Switching
+            const tabs = document.querySelectorAll('.tab-btn');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    document.getElementById(tab.getAttribute('data-tab')).classList.add('active');
+                });
+            });
+
+            // Bind header clicks
+            const headerIds = {
+                'th-rank': 'rank',
+                'th-name': 'name',
+                'th-level': 'level',
+                'th-time': 'time',
+                'th-failures': 'failures'
+            };
+            Object.keys(headerIds).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('click', () => {
+                        setSort(headerIds[id]);
+                    });
+                }
+            });
+
+            // High-precision ticking loop (60fps) - Runs continuously for real-time connection responsiveness
+            const tick = () => {
+                if (lastState) {
+                    updateUI(lastState);
+                }
+                requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+
+            socket.on('connect', () => {
+                console.log("Connected to server");
+                socket.emit('admin_join');
+            });
+
+            socket.on('game_state_update', (state) => {
+                lastState = state;
+                updateUI(state);
+            });
+
+            document.getElementById('btn-start-mission').onclick = () => {
+                socket.emit('start_mission');
+            };
+
+            document.getElementById('btn-reset-session').onclick = () => {
+                if(confirm("Are you sure you want to reset the session?")) {
+                    socket.emit('reset_session');
+                }
+            };
+        }
+
+        function updateUI(state) {
+            document.getElementById('display-room-code').innerText = state.roomCode;
+            document.getElementById('server-status').innerText = state.gameStarted ? '● MISSION ACTIVE' : '● STANDBY';
+            document.getElementById('server-status').style.color = state.gameStarted ? '#33ff33' : '#ffaa00';
+
+            const teamGrid = document.getElementById('team-grid');
+            const teams = Object.values(state.teams);
+            
+            document.getElementById('connection-count').innerText = `${teams.length} Connected Teams`;
+
+            if (teams.length === 0) {
+                teamGrid.innerHTML = '<p style="color: #444;">No teams connected.</p>';
+                document.getElementById('leaderboard-body').innerHTML = '';
+                return;
+            }
+
+            // Calculate live time for each team
+            teams.forEach(team => {
+                if (state.gameStarted && team.startTime) {
+                    team.liveTotalTime = (Date.now() - team.startTime) / 1000;
+                } else {
+                    team.liveTotalTime = team.totalTime || 0;
+                }
+            });
+
+            // Render Active Grid
+            teamGrid.innerHTML = teams.map(team => `
+                <div class="team-card">
+                    <div class="team-header">
+                        <span class="team-name">${team.name}</span>
+                        <span class="team-level">LVL ${team.level}</span>
+                    </div>
+                    <div class="team-stats">
+                        <div class="stat">
+                            <span class="stat-label">Status</span>
+                            <span class="stat-value" style="color: ${team.status === 'ACTIVE' ? '#33ff33' : '#ff3300'}">${team.status}</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Failures</span>
+                            <span class="stat-value">⚠️ ${team.failures}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Render Leaderboard with Sorting and Filters
+            // 1. Calculate the official rank for all teams first using the standard rules
+            const rankedTeams = [...teams].sort((a, b) => {
+                if (b.level !== a.level) return b.level - a.level;
+                if (a.liveTotalTime !== b.liveTotalTime) return a.liveTotalTime - b.liveTotalTime;
+                return a.failures - b.failures;
+            });
+            
+            teams.forEach(team => {
+                team.officialRank = rankedTeams.findIndex(t => t.id === team.id) + 1;
+            });
+
+            // 2. Filter teams by search query and active status
+            const searchQuery = (document.getElementById('leaderboard-search')?.value || '').toLowerCase();
+            const activeOnly = document.getElementById('filter-active')?.checked || false;
+
+            const filteredTeams = teams.filter(team => {
+                const matchesSearch = team.name.toLowerCase().includes(searchQuery);
+                const matchesActive = !activeOnly || team.status === 'ACTIVE';
+                return matchesSearch && matchesActive;
+            });
+
+            // 3. Sort the filtered teams based on the selected column header
+            filteredTeams.sort((a, b) => {
+                let comparison = 0;
+                if (currentSortField === 'rank') {
+                    comparison = a.officialRank - b.officialRank;
+                } else if (currentSortField === 'name') {
+                    comparison = a.name.localeCompare(b.name);
+                } else if (currentSortField === 'level') {
+                    comparison = a.level - b.level;
+                } else if (currentSortField === 'time') {
+                    comparison = a.liveTotalTime - b.liveTotalTime;
+                } else if (currentSortField === 'failures') {
+                    comparison = a.failures - b.failures;
+                }
+                return currentSortOrder === 'asc' ? comparison : -comparison;
+            });
+
+            const formatTime = (s) => {
+                return (typeof s === 'number' && !isNaN(s)) ? s.toFixed(5) : '0.00000';
+            };
+
+            document.getElementById('leaderboard-body').innerHTML = filteredTeams.map(team => {
+                let rankClass = '';
+                if (team.officialRank === 1) rankClass = 'rank-gold';
+                else if (team.officialRank === 2) rankClass = 'rank-silver';
+                else if (team.officialRank === 3) rankClass = 'rank-bronze';
+
+                return `
+                    <tr>
+                        <td class="${rankClass}">#${team.officialRank}</td>
+                        <td style="font-family: 'Press Start 2P'; font-size: 0.7rem;">${team.name}</td>
+                        <td>LVL ${team.level}</td>
+                        <td style="font-family: 'Share Tech Mono'; font-size: 1.1rem; color: var(--accent-blue);">${formatTime(team.liveTotalTime)}s</td>
+                        <td style="color: ${team.failures > 0 ? '#ff3300' : '#888'}">${team.failures}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>

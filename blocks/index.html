@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOMINO'S EFFECT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="asstes/style.css">
+    <!-- Three.js for 3D Phase -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <!-- 3D GAME CONTAINER (Levels 1-5) -->
+    <div id="game-container" class="hidden">
+        <canvas id="game-canvas" tabindex="0"></canvas>
+        
+        <!-- HUD -->
+        <div id="hud" class="hidden">
+            <div id="level-indicator">[ LVL <span id="current-level">1</span>/25 ]</div>
+            <div id="team-display" style="position: absolute; top: 60px; left: 20px; font-family: 'Press Start 2P', cursive; font-size: 0.8rem; color: #ffaa00; text-shadow: 2px 2px #000;">TEAM: <span id="current-team">---</span></div>
+            <div id="lives-container">
+                <span class="skull">💀</span>
+                <span class="skull">💀</span>
+                <span class="skull">💀</span>
+            </div>
+            <canvas id="minimap"></canvas>
+            <div id="interact-prompt" class="hidden">Press [E] to Interact</div>
+            <div id="player-hand"></div>
+        </div>
+
+        <!-- System Login Screen -->
+        <div id="login-screen" class="overlay screen">
+            <h1 class="title">DOMINO'S EFFECT</h1>
+            <p class="subtitle">ENCRYPTED ACCESS REQUIRED</p>
+            <div class="menu-chest"></div>
+            <input type="text" id="team-name" class="admin-input" placeholder="TEAM NAME" style="margin-bottom: 10px;">
+            <input type="password" id="player-pass" class="admin-input" placeholder="ACCESS CODE">
+            <button id="btn-login" class="menu-btn">AUTHORIZE</button>
+            <button id="btn-back-login" class="menu-btn">BACK</button>
+            <p id="login-error" class="text-red hidden" style="margin-top: 10px;">INVALID ACCESS CODE</p>
+        </div>
+
+        <!-- Waiting Screen -->
+        <div id="waiting-screen" class="overlay screen hidden">
+            <h1 class="title">STANDBY</h1>
+            <p class="subtitle">WAITING FOR MASTER'S ORDER</p>
+            <div class="menu-chest"></div>
+            <div id="waiting-team-name" style="font-family: 'Press Start 2P'; color: #ffaa00; margin-top: 1rem;">TEAM: ---</div>
+        </div>
+
+        <!-- Main Menu -->
+        <div id="main-menu" class="overlay screen hidden">
+            <h1 class="title">DOMINO'S EFFECT</h1>
+            <p class="subtitle">Aptitude is the only weapon.</p>
+            <div class="menu-chest"></div>
+            <button id="btn-start" class="menu-btn">START GAME</button>
+            <button id="btn-admin" class="menu-btn">ADMIN ACCESS</button>
+            <button id="btn-how" class="menu-btn">HOW TO PLAY</button>
+            <button id="btn-credits" class="menu-btn">CREDITS</button>
+        </div>
+
+        <!-- Admin Panel Modal -->
+        <div id="admin-panel" class="overlay hidden screen">
+            <h2>ADMIN ACCESS</h2>
+            <div id="admin-login-box">
+                <p>Enter Authorization Code:</p>
+                <input type="password" id="admin-pass" class="admin-input" placeholder="****">
+                <button id="btn-admin-login" class="menu-btn">LOGIN</button>
+            </div>
+            <div id="admin-level-selector" class="hidden">
+                <p>Select Deployment Level:</p>
+                <div class="level-grid">
+                    <button class="level-btn" data-level="0">01</button>
+                    <button class="level-btn" data-level="1">02</button>
+                    <button class="level-btn" data-level="2">03</button>
+                    <button class="level-btn" data-level="3">04</button>
+                    <button class="level-btn" data-level="4">05</button>
+                    <button class="level-btn" data-level="5">06</button>
+                    <button class="level-btn" data-level="6">07</button>
+                    <button class="level-btn" data-level="7">08</button>
+                    <button class="level-btn" data-level="8">09</button>
+                    <button class="level-btn" data-level="9">10</button>
+                    <button class="level-btn" data-level="10">11</button>
+                    <button class="level-btn" data-level="11">12</button>
+                    <button class="level-btn" data-level="12">13</button>
+                    <button class="level-btn" data-level="13">14</button>
+                    <button class="level-btn" data-level="14">15</button>
+                    <button class="level-btn" data-level="15">16</button>
+                    <button class="level-btn" data-level="16">17</button>
+                    <button class="level-btn" data-level="17">18</button>
+                    <button class="level-btn" data-level="18">19</button>
+                    <button class="level-btn" data-level="19">20</button>
+                    <button class="level-btn" data-level="20">21</button>
+                    <button class="level-btn" data-level="21">22</button>
+                    <button class="level-btn" data-level="22">23</button>
+                    <button class="level-btn" data-level="23">24</button>
+                    <button class="level-btn" data-level="24">25</button>
+                </div>
+            </div>
+            <p id="admin-error" class="text-red hidden">INVALID CODE</p>
+            <button id="btn-back-admin" class="menu-btn">BACK</button>
+        </div>
+
+        <!-- How To Play Modal -->
+        <div id="how-to-play" class="overlay hidden screen">
+            <h2>HOW TO PLAY</h2>
+            <p>WASD / Arrows - Move</p>
+            <p>Mouse / Left & Right - Look</p>
+            <p>M - Toggle Minimap</p>
+            <p>E - Interact</p>
+            <p><br>Find the hidden chest in each level.</p>
+            <p>Solve the aptitude puzzle inside to proceed.</p>
+            <button id="btn-back-how" class="menu-btn">BACK</button>
+        </div>
+
+        <!-- Credits Modal -->
+        <div id="credits" class="overlay hidden screen">
+            <h2>CREDITS</h2>
+            <p>Built with Three.js</p>
+            <p>Inspired by DOOM (1993)</p>
+            <p>Powered by curiosity.</p>
+            <button id="btn-back-credits" class="menu-btn">BACK</button>
+        </div>
+
+        <!-- Quiz Modal -->
+        <div id="quiz-modal" class="overlay hidden screen">
+            <div id="timer-bar-container"><div id="timer-bar"></div></div>
+            <div class="chest-open-animation"></div>
+            <div id="question-text">Question loading...</div>
+            <div id="options-container">
+                <button class="option-btn" data-opt="0"><span class="opt-label">A</span> <span class="opt-text">Option A</span></button>
+                <button class="option-btn" data-opt="1"><span class="opt-label">B</span> <span class="opt-text">Option B</span></button>
+                <button class="option-btn" data-opt="2"><span class="opt-label">C</span> <span class="opt-text">Option C</span></button>
+                <button class="option-btn" data-opt="3"><span class="opt-label">D</span> <span class="opt-text">Option D</span></button>
+            </div>
+            <div id="quiz-feedback" class="hidden"></div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over" class="overlay hidden screen">
+            <h1 class="title text-red">SYSTEM ERROR</h1>
+            <p>Your aptitude was insufficient.</p>
+            <button id="btn-restart" class="menu-btn">REBOOT</button>
+        </div>
+
+        <!-- Win/Transition Screen -->
+        <div id="win-screen" class="overlay hidden screen">
+            <h1 class="title text-green">PHASE 1 COMPLETE</h1>
+            <p id="final-score">Initializing Logic Systems...</p>
+            <button id="btn-main-menu" class="menu-btn hidden">MAIN MENU</button>
+        </div>
+
+        <div id="level-transition" class="overlay hidden screen">
+            <h1 id="transition-text">LOADING...</h1>
+        </div>
+
+        <div class="scanlines"></div>
+        <div class="vignette"></div>
+    </div>
+
+    <!-- BLOCKLY GAME WRAPPER (Levels 6+) -->
+    <div class="app-wrapper hidden">
+        <header class="main-header">
+            <div class="logo">
+                <span class="logo-icon">💠</span>
+                <h1>DOMINO'S<span> EFFECT</span></h1>
+            </div>
+            <nav class="controls">
+                <div class="file-upload-wrapper">
+                    <button id="adminAuthBtn" class="btn secondary-btn" style="color: #ea4335; border-color: #fce8e6; background-color: #fce8e6;">
+                        <span class="icon">🔒</span> Admin
+                    </button>
+                    <select id="adminLevelSelect" class="btn secondary-btn" style="display: none; appearance: none; padding-right: 2rem; background: url('data:image/svg+xml;utf8,<svg fill=%22%233c4043%22 height=%2224%22 viewBox=%220 0 24 24%22 width=%2224%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M7 10l5 5 5-5z%22/><path d=%22M0 0h24v24H0z%22 fill=%22none%22/></svg>') no-repeat right 0.5rem center / 1.5rem; background-color: white; cursor: pointer;">
+                        <option value="6">Level 6</option>
+                        <option value="7">Level 7</option>
+                        <option value="8">Level 8</option>
+                        <option value="9">Level 9</option>
+                        <option value="10">Level 10</option>
+                        <option value="11">Level 11</option>
+                        <option value="12">Level 12</option>
+                        <option value="13">Level 13</option>
+                        <option value="14">Level 14</option>
+                        <option value="15">Level 15</option>
+                        <option value="16">Level 16</option>
+                        <option value="17">Level 17</option>
+                        <option value="18">Level 18</option>
+                        <option value="19">Level 19</option>
+                        <option value="20">Level 20</option>
+                        <option value="21">Level 21</option>
+                        <option value="22">Level 22</option>
+                        <option value="23">Level 23</option>
+                        <option value="24">Level 24</option>
+                        <option value="25">Level 25</option>
+                    </select>
+                </div>
+                <div class="file-upload-wrapper">
+                    <label for="levelUpload" class="file-label">
+                        <span class="icon">📁</span> Load Level
+                    </label>
+                    <input type="file" id="levelUpload" accept=".json" class="file-input">
+                </div>
+                <button id="runBtn" class="btn primary-btn">
+                    <span class="icon">▶</span> Run Code
+                </button>
+                <button id="resetBtn" class="btn secondary-btn">
+                    <span class="icon">🔄</span> Reset
+                </button>
+            </nav>
+        </header>
+        
+        <main class="game-layout">
+            <section id="gameArea" class="viewport-section">
+                <div class="viewport-header">
+                    <h2>Logic Preview</h2>
+                    <div class="status-indicator" id="statusIndicator">Ready</div>
+                </div>
+                <div class="viewport-canvas">
+                    <div id="gridContainer" class="grid-container"></div>
+                </div>
+            </section>
+
+            <section id="blocklyArea" class="editor-section">
+                <div class="editor-header">
+                    <h2>Logic Architect</h2>
+                    <div id="capacityIndicator" class="capacity-indicator"></div>
+                </div>
+                <div class="editor-container">
+                    <div id="blocklyDiv"></div>
+                </div>
+            </section>
+
+            <section class="help-section">
+                <div class="help-header"><h2>Pro Tips</h2></div>
+                <div class="help-content">
+                    <div class="tip-card">
+                        <h3>The 25-Level Roadmap</h3>
+                        <p>Logic Phase (Levels 6-10). More coming for 11-25!</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Blockly Toolbox -->
+    <xml id="toolbox" style="display: none">
+        <block type="move_forward"></block>
+        <block type="maze_turn"><field name="DIR">turnLeft</field></block>
+        <block type="maze_turn"><field name="DIR">turnRight</field></block>
+        <block type="maze_until"></block>
+        <block type="maze_if"></block>
+        <block type="maze_ifElse"></block>
+    </xml>
+
+    <div id="victoryModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>🎉 Level Complete! 🎉</h2>
+            <button id="nextLevelBtn" class="btn primary-btn" style="margin-top: 1.5rem; width: 100%; justify-content: center;">Next Level</button>
+        </div>
+    </div>
+
+    <!-- Google Blockly -->
+    <script src="https://unpkg.com/blockly/blockly.min.js"></script>
+    <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
+    <script src="https://unpkg.com/blockly/msg/en.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    
+    <script src="js/blocks.js"></script>
+    <script type="module" src="js/game.js"></script>
+</body>
+</html>

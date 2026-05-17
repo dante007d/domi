@@ -1,0 +1,11 @@
+{
+  "name": "dominos-effect",
+  "version": "1.0.0",
+  "description": "A Katana Zero style platformer",
+  "main": "save_server.js",
+  "scripts": {
+    "start": "node save_server.js",
+    "dev": "node save_server.js"
+  },
+  "dependencies": {}
+}

@@ -1,0 +1,22 @@
+{
+  "rows": 5,
+  "cols": 5,
+  "maxBlocks": 9,
+  "walls": {
+    "2,2": ["south", "east"],
+    "4,3": ["north", "east"],
+    "3,4": ["south"]
+  },
+  "robots": [
+    {
+      "x": 1,
+      "y": 1,
+      "_orientation": 1
+    }
+  ],
+  "goal": {
+    "possible_final_positions": [
+      [5, 5]
+    ]
+  }
+}

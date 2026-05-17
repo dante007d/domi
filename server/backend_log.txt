@@ -1,0 +1,4 @@
+⬡ Operation Prometheus server running on port 3001
+[CONNECT] New socket connected: m1Mj3K1VA6fRqkfYAAAB
+[DISCONNECT] Socket m1Mj3K1VA6fRqkfYAAAB disconnected: transport close
+^C

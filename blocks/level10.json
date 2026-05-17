@@ -1,0 +1,164 @@
+{
+  "rows": 9,
+  "cols": 9,
+  "maxBlocks": 7,
+  "walls": {
+    "3,1": [
+      "north",
+      "east",
+      "west"
+    ],
+    "1,2": [
+      "north",
+      "south",
+      "west"
+    ],
+    "2,2": [
+      "north",
+      "south"
+    ],
+    "4,2": [
+      "north",
+      "south"
+    ],
+    "5,2": [
+      "north"
+    ],
+    "6,2": [
+      "north",
+      "south"
+    ],
+    "7,2": [
+      "north"
+    ],
+    "8,2": [
+      "north",
+      "south"
+    ],
+    "9,2": [
+      "north",
+      "east",
+      "south"
+    ],
+    "3,3": [
+      "east",
+      "west"
+    ],
+    "5,3": [
+      "east",
+      "west"
+    ],
+    "7,3": [
+      "east",
+      "west"
+    ],
+    "1,4": [
+      "north",
+      "south",
+      "west"
+    ],
+    "2,4": [
+      "north",
+      "south"
+    ],
+    "4,4": [
+      "north",
+      "south"
+    ],
+    "5,4": [
+      "east"
+    ],
+    "7,4": [
+      "west"
+    ],
+    "8,4": [
+      "north",
+      "south"
+    ],
+    "9,4": [
+      "north",
+      "east"
+    ],
+    "3,5": [
+      "east",
+      "west"
+    ],
+    "5,5": [
+      "east",
+      "west"
+    ],
+    "7,5": [
+      "east",
+      "west"
+    ],
+    "9,5": [
+      "east",
+      "west"
+    ],
+    "1,6": [
+      "north",
+      "south",
+      "west"
+    ],
+    "2,6": [
+      "north",
+      "south"
+    ],
+    "4,6": [
+      "north",
+      "south"
+    ],
+    "6,6": [
+      "north",
+      "south"
+    ],
+    "7,6": [
+      "south"
+    ],
+    "8,6": [
+      "north",
+      "south"
+    ],
+    "9,6": [
+      "east"
+    ],
+    "3,7": [
+      "east",
+      "south",
+      "west"
+    ],
+    "5,7": [
+      "east",
+      "south",
+      "west"
+    ],
+    "9,7": [
+      "east",
+      "west"
+    ],
+    "8,8": [
+      "north",
+      "south",
+      "west"
+    ],
+    "9,8": [
+      "east",
+      "south"
+    ]
+  },
+  "robots": [
+    {
+      "x": 8,
+      "y": 8,
+      "_orientation": 1
+    }
+  ],
+  "goal": {
+    "possible_final_positions": [
+      [
+        1,
+        2
+      ]
+    ]
+  }
+}

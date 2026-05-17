@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOMINO'S EFFECT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Three.js Canvas will be injected here -->
+        <canvas id="game-canvas" tabindex="0"></canvas>
+        
+        <!-- HUD -->
+        <div id="hud" class="hidden">
+            <div id="level-indicator">[ LVL <span id="current-level">1</span>/5 ]</div>
+            <div id="lives-container">
+                <span class="skull">💀</span>
+                <span class="skull">💀</span>
+                <span class="skull">💀</span>
+            </div>
+            <canvas id="minimap"></canvas>
+            <div id="interact-prompt" class="hidden">Press [E] to Interact</div>
+            <div id="player-hand"></div>
+        </div>
+
+        <!-- Main Menu -->
+        <div id="main-menu" class="overlay screen">
+            <h1 class="title">DOMINO'S EFFECT</h1>
+            <p class="subtitle">Aptitude is the only weapon.</p>
+            <div class="menu-chest"></div>
+            <button id="btn-start" class="menu-btn">START GAME</button>
+            <button id="btn-admin" class="menu-btn">ADMIN ACCESS</button>
+            <button id="btn-how" class="menu-btn">HOW TO PLAY</button>
+            <button id="btn-credits" class="menu-btn">CREDITS</button>
+        </div>
+
+        <!-- Admin Panel Modal -->
+        <div id="admin-panel" class="overlay hidden screen">
+            <h2>ADMIN ACCESS</h2>
+            <div id="admin-login-box">
+                <p>Enter Authorization Code:</p>
+                <input type="password" id="admin-pass" class="admin-input" placeholder="****">
+                <button id="btn-admin-login" class="menu-btn">LOGIN</button>
+            </div>
+            <div id="admin-level-selector" class="hidden">
+                <p>Select Deployment Level:</p>
+                <div class="level-grid">
+                    <button class="level-btn" data-level="0">01</button>
+                    <button class="level-btn" data-level="1">02</button>
+                    <button class="level-btn" data-level="2">03</button>
+                    <button class="level-btn" data-level="3">04</button>
+                    <button class="level-btn" data-level="4">05</button>
+                </div>
+            </div>
+            <p id="admin-error" class="text-red hidden">INVALID CODE</p>
+            <button id="btn-back-admin" class="menu-btn">BACK</button>
+        </div>
+
+        <!-- How To Play Modal -->
+        <div id="how-to-play" class="overlay hidden screen">
+            <h2>HOW TO PLAY</h2>
+            <p>WASD / Arrows - Move</p>
+            <p>Mouse / Left & Right - Look</p>
+            <p>M - Toggle Minimap</p>
+            <p>E - Interact</p>
+            <p><br>Find the hidden chest in each level.</p>
+            <p>Solve the aptitude puzzle inside to proceed.</p>
+            <button id="btn-back-how" class="menu-btn">BACK</button>
+        </div>
+
+        <!-- Credits Modal -->
+        <div id="credits" class="overlay hidden screen">
+            <h2>CREDITS</h2>
+            <p>Built with Three.js</p>
+            <p>Inspired by DOOM (1993)</p>
+            <p>Powered by curiosity.</p>
+            <button id="btn-back-credits" class="menu-btn">BACK</button>
+        </div>
+
+        <!-- Quiz Modal -->
+        <div id="quiz-modal" class="overlay hidden screen">
+            <div id="timer-bar-container"><div id="timer-bar"></div></div>
+            <div class="chest-open-animation"></div>
+            <div id="question-text">Question loading...</div>
+            <div id="options-container">
+                <button class="option-btn" data-opt="0"><span class="opt-label">A</span> <span class="opt-text">Option A</span></button>
+                <button class="option-btn" data-opt="1"><span class="opt-label">B</span> <span class="opt-text">Option B</span></button>
+                <button class="option-btn" data-opt="2"><span class="opt-label">C</span> <span class="opt-text">Option C</span></button>
+                <button class="option-btn" data-opt="3"><span class="opt-label">D</span> <span class="opt-text">Option D</span></button>
+            </div>
+            <div id="quiz-feedback" class="hidden"></div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="game-over" class="overlay hidden screen">
+            <h1 class="title text-red">SYSTEM ERROR</h1>
+            <p>Your aptitude was insufficient.</p>
+            <button id="btn-restart" class="menu-btn">REBOOT</button>
+        </div>
+
+        <!-- Win Screen -->
+        <div id="win-screen" class="overlay hidden screen">
+            <h1 class="title text-green">ACCESS GRANTED</h1>
+            <p>You have conquered the Maze.</p>
+            <p id="final-score"></p>
+            <button id="btn-main-menu" class="menu-btn">MAIN MENU</button>
+        </div>
+
+        <!-- Level Transition -->
+        <div id="level-transition" class="overlay hidden screen">
+            <h1 id="transition-text">LOADING...</h1>
+        </div>
+
+        <!-- CRT Effects -->
+        <div class="scanlines"></div>
+        <div class="vignette"></div>
+    </div>
+
+    <!-- Main Logic -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

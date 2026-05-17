@@ -596,7 +596,10 @@
             this.teamName = "PLAYER";
         }
         if (typeof io !== 'undefined') {
-            this.socket = io('http://localhost:3002');
+            const socketUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'http://localhost:3002'
+                : (localStorage.getItem('BACKEND_URL') || 'https://dominos-effect-backend.onrender.com');
+            this.socket = io(socketUrl);
             this.socket.emit('join_game', { teamName: this.teamName, teamId: this.teamId });
         }
 

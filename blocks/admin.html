@@ -388,6 +388,12 @@
                 <div id="server-status" style="color: var(--accent-green);">● ONLINE</div>
                 <div id="connection-count" style="margin-top: 0.5rem; color: #888;">0 Connections</div>
             </div>
+
+            <div style="margin-top: 2rem; border-top: 1px solid #333; padding-top: 1.5rem;">
+                <h2 class="section-title">Production Backend URL</h2>
+                <input type="text" id="backend-url-input" placeholder="https://your-app.onrender.com" style="width: 100%; background: #000; border: 1px solid var(--accent-blue); color: var(--accent-blue); padding: 8px; font-family: 'Share Tech Mono', monospace; outline: none; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                <button class="action-btn" id="btn-save-backend" style="border-color: var(--accent-blue); color: var(--accent-blue); margin-top: 0; padding: 6px; font-size: 0.8rem;">SAVE & RECONNECT</button>
+            </div>
         </section>
     </main>
 
@@ -451,7 +457,36 @@
         }
 
         function initDashboard() {
-            socket = io('http://localhost:3002');
+            // Retrieve custom backend URL or use default
+            const defaultProdUrl = 'https://dominos-effect-backend.onrender.com';
+            const savedUrl = localStorage.getItem('BACKEND_URL') || defaultProdUrl;
+            
+            // Set input value and save click listener
+            const backendInput = document.getElementById('backend-url-input');
+            const saveBackendBtn = document.getElementById('btn-save-backend');
+            if (backendInput) {
+                backendInput.value = savedUrl;
+            }
+            if (saveBackendBtn) {
+                saveBackendBtn.onclick = () => {
+                    const newUrl = backendInput.value.trim();
+                    if (newUrl) {
+                        localStorage.setItem('BACKEND_URL', newUrl);
+                        alert("Production Backend URL updated! Reloading to reconnect...");
+                        window.location.reload();
+                    } else {
+                        localStorage.removeItem('BACKEND_URL');
+                        alert("Backend URL reset to default! Reloading...");
+                        window.location.reload();
+                    }
+                };
+            }
+
+            const socketUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+                ? 'http://localhost:3002'
+                : savedUrl;
+
+            socket = io(socketUrl);
 
             // Tab Switching
             const tabs = document.querySelectorAll('.tab-btn');

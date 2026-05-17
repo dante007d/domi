@@ -196,7 +196,10 @@ export class Game {
         this.chests = [];
         
         // Multiplayer Socket
-        this.socket = io('http://localhost:3002');
+        const socketUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:3002'
+            : (localStorage.getItem('BACKEND_URL') || 'https://dominos-effect-backend.onrender.com');
+        this.socket = io(socketUrl);
         this.teamId = 'team-' + Math.random().toString(36).substr(2, 9);
 
         // Listen for mission start

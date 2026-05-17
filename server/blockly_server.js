@@ -7,8 +7,11 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
+    origin: (origin, callback) => {
+      callback(null, origin || true);
+    },
+    methods: ["GET", "POST"],
+    credentials: true
   },
   // Production-grade performance tweaks
   pingTimeout: 30000,
@@ -16,7 +19,12 @@ const io = new Server(httpServer, {
   transports: ['websocket', 'polling'] 
 });
 
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    callback(null, origin || true);
+  },
+  credentials: true
+}));
 
 const gameState = {
     roomCode: "BLOCKLY-MAIN",

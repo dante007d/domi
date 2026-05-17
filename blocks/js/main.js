@@ -9,6 +9,170 @@ import { QuizManager } from './quiz.js';
 import { Levels } from './levels.js';
 import { AudioSystem } from './audio.js';
 
+const RAGE_INSULTS = [
+    "I’ve seen disconnected players contribute more than you.",
+    "You’re not the weakest player here. You’re the reason the weak feel better about themselves.",
+    "You fight like every neuron in your brain filed for resignation.",
+    "Your gameplay is a crime scene and your teammates are the witnesses.",
+    "You don’t make mistakes anymore. You manufacture disasters.",
+    "You move with the confidence of a god and the awareness of roadkill.",
+    "The enemy team isn’t trying to kill you anymore. They’re just seeing what else you’ll do wrong.",
+    "You are single-handedly lowering the skill ceiling of the entire match.",
+    "You play like failure owes you money.",
+    "Your mechanics are so bad they look intentionally sabotaged.",
+    "You got dismantled so completely even the spectators lost respect.",
+    "You aim like your crosshair has a restraining order against enemies.",
+    "Every time you touch the keyboard, your team loses hope.",
+    "You’re not unpredictable because you’re smart. You’re unpredictable because nothing you do makes sense.",
+    "You enter fights already defeated.",
+    "The enemy doesn’t outplay you. They wait for you to self-destruct.",
+    "You perform like a motivational quote written on a collapsing building.",
+    "Your existence in ranked is a public safety hazard.",
+    "You’re so consistently useless it almost becomes impressive.",
+    "You fight like your brain is running on trial software.",
+    "You’re not pressure-tested. You’re pressure-deleted.",
+    "The scoreboard isn’t stats anymore. It’s evidence.",
+    "You’re the human equivalent of a failed quick-time event.",
+    "You got humiliated so badly the game should apologize for matchmaking.",
+    "Your gameplay radiates panic, confusion, and unemployment.",
+    "You’re not a clutch player. You’re a cautionary tale.",
+    "You make incompetence look genetically inherited.",
+    "Your enemies stopped respecting the fight and started speedrunning you.",
+    "You move like your keyboard inputs are legally binding mistakes.",
+    "Every round with you feels like a hostage situation.",
+    "You don’t lose because of mechanics. You lose because every decision you make is catastrophically stupid.",
+    "You have the awareness of expired yogurt.",
+    "Your strategy is just random panic disguised as movement.",
+    "You’re the reason teammates mute voice chat.",
+    "You fight like your thoughts arrive 30 seconds late.",
+    "You couldn’t outplay a loading screen.",
+    "Your gameplay belongs in a museum of preventable disasters.",
+    "The enemy team isn’t farming kills anymore. They’re farming confidence.",
+    "You’re not dead weight. Dead weight at least stays still.",
+    "You bring the tactical value of a smoke detector without batteries.",
+    "You’re the first player I’ve seen get mentally defeated before the countdown ends.",
+    "You play like your mouse is controlled by intrusive thoughts.",
+    "You’re not improving. You’re just repeating failure with enthusiasm.",
+    "You aim with the determination of a blindfolded tourist.",
+    "Your performance makes bots look handcrafted.",
+    "You are the strongest argument against skill-based matchmaking.",
+    "You fight like a man trying to refund the game through gameplay.",
+    "Your team doesn’t need enemies with you around.",
+    "You got outclassed so badly it looked educational.",
+    "You’re not part of the match. You’re the comic relief.",
+    "The only thing more fragile than your gameplay is your decision-making.",
+    "You are what happens when ego queues without skill.",
+    "You are living proof that matchmaking can fail catastrophically.",
+    "Calling you trash is disrespectful to garbage. Garbage gets recycled into something useful.",
+    "You play like your monitor is turned off and your ego is turned up.",
+    "Every second you stay alive is statistical luck.",
+    "You’re not feeding the enemy. You’re running a charity.",
+    "Your gameplay has the survival instinct of a moth in a furnace.",
+    "You fight like someone typing with oven mitts.",
+    "Your enemies aren’t even impressed anymore. They’re concerned.",
+    "You have the mechanical precision of a collapsing shopping cart.",
+    "Watching you play explains why natural selection takes time.",
+    "You bring absolutely nothing to the battlefield except extra deaths.",
+    "Your aim belongs in a missing persons report.",
+    "You move like your brain and hands are in a long-distance relationship.",
+    "Even your own teammates mentally disconnected from you.",
+    "You’re the kind of noob tutorials warn people about.",
+    "Your opponent isn’t skilled. You’re just catastrophically incompetent.",
+    "You got destroyed so badly the replay should be classified as violence.",
+    "Every fight becomes easier the moment you join the enemy team accidentally.",
+    "You play like failure is genetically encoded.",
+    "Your confidence survives longer than your character ever does.",
+    "You make basic mistakes with professional consistency.",
+    "Even bots would hesitate before making decisions this stupid.",
+    "You’re not hardstuck because of teammates. You are the teammate.",
+    "Your gameplay looks like a parody made to insult bad players.",
+    "You die with such speed and consistency it feels automated.",
+    "You enter fights like a motivational speaker and leave like roadkill.",
+    "You couldn’t clutch a single neuron together under pressure.",
+    "You aim at enemies like you’re politely asking permission to hit them.",
+    "Your strategy begins with panic and ends with excuses.",
+    "You have the tactical awareness of a wet sock.",
+    "Your performance lowered the value of teamwork.",
+    "You got outplayed so hard your keyboard deserves a better owner.",
+    "You play like you owe the enemy team money.",
+    "You’re not learning from mistakes anymore. You’re preserving traditions.",
+    "The only thing carrying you is delusion.",
+    "You lose fights before they even begin because your decisions are terminally bad.",
+    "You make incompetence look effortless.",
+    "Your mechanics are so bad they loop back into comedy.",
+    "You fight like your thoughts are buffering.",
+    "You’re what happens when confidence outruns intelligence.",
+    "The enemy isn’t farming kills anymore. They’re farming self-esteem.",
+    "You bring the same energy as a broken controller at a tournament.",
+    "You got read so easily your opponent probably predicted your birth date too.",
+    "You are the final boss of poor decision-making.",
+    "Your gameplay belongs in a cautionary documentary.",
+    "You have the awareness of decorative furniture.",
+    "You’re not unlucky. You’re just bad repeatedly.",
+    "Your existence in this lobby is a competitive disadvantage.",
+    "You play with the intensity of a man trying to lose on purpose.",
+    "Even spectators are getting tilted watching this incompetence.",
+    "You got folded so fast the laws of physics took notes.",
+    "Your enemies stopped sweating and started experimenting.",
+    "You’re not a threat. You’re warm-up content.",
+    "The arena doesn’t fear you. It farms you.",
+    "I’ve seen training dummies survive longer than you.",
+    "You’re not just bad — you actively reduce the intelligence of the entire lobby.",
+    "Your gameplay is what happens when confidence develops faster than skill.",
+    "You die so fast the respawn timer knows you personally.",
+    "Even your failures lack effort.",
+    "You play like your only goal is disappointing everyone equally.",
+    "The enemy team stopped calling you a threat five deaths ago.",
+    "You have the tactical awareness of a brick thrown through a window.",
+    "Every decision you make somehow becomes the worst possible one.",
+    "You move like panic is your default control scheme.",
+    "You’re not hard to beat. You’re hard to watch.",
+    "You got destroyed with such efficiency it looked scheduled.",
+    "The only thing sharp about your gameplay is the drop in team morale.",
+    "You enter every fight with the confidence of a champion and the competence of unplugged hardware.",
+    "You are the physical manifestation of ‘skill issue.’",
+    "Your enemies aren’t adapting to you. They’re abusing you.",
+    "You fight like a motivational speech trapped inside a bad player.",
+    "You’ve mastered one mechanic: losing consistently.",
+    "Watching you think in real time is painful.",
+    "You got folded so hard even your excuses sounded defeated.",
+    "Your gameplay has the energy of expired batteries.",
+    "You make simple mistakes with elite precision.",
+    "You’re not a competitor. You’re environmental storytelling.",
+    "You play like the concept of improvement personally offended you.",
+    "The enemy team uses you to test risky strategies because they know you can’t punish mistakes.",
+    "You have the reaction time of a voicemail.",
+    "You collapse under pressure that doesn’t even exist.",
+    "You fight like your survival depends entirely on luck and pity.",
+    "Your gameplay belongs in a bug report.",
+    "You make losing look less like failure and more like destiny.",
+    "You’re not trash. Trash eventually gets taken out.",
+    "The only thing carrying you is matchmaking mercy.",
+    "You’re the reason tutorials include pictures.",
+    "Your teammates stopped expecting help and started expecting damage control.",
+    "You got dismantled so completely the scoreboard looks disrespectful.",
+    "You aim like your crosshair is afraid of enemies.",
+    "You bring chaos to your own side and confidence to the enemy.",
+    "Your gameplay is a live demonstration of unmanaged incompetence.",
+    "You move through the map like a lost tourist.",
+    "Even your lucky moments look accidental.",
+    "You don’t lose because the enemy is good. You lose because you exist in the fight.",
+    "You’re not getting outplayed anymore. You’re getting studied.",
+    "You make bad decisions with the certainty of a genius.",
+    "The enemy team treats you like free downloadable content.",
+    "You’re the weakest thing on the battlefield, including the decorations.",
+    "You enter every match like a hero and leave like evidence.",
+    "Your survival instincts are purely decorative.",
+    "You got humiliated so hard even the game stopped trying to make it fair.",
+    "You play with maximum ego and minimum awareness.",
+    "Your mechanics look hand-crafted to fail under pressure.",
+    "You are what happens when failure gets a keyboard.",
+    "Every time you respawn, the enemy gets a confidence boost.",
+    "You’re not built for competition. You’re built for tutorials.",
+    "You fight like your brain clocked out before the match started.",
+    "The scoreboard tells a story, and your chapter is pure suffering."
+];
+
 export class Game {
     constructor() {
         window.game = this; // For debugging
@@ -461,15 +625,51 @@ export class Game {
         this.quiz.lives--;
         document.querySelectorAll('.skull')[this.quiz.lives].style.opacity = '0.2';
         
-        if (this.quiz.lives <= 0) {
-            setTimeout(() => this.onGameOver(), 1000);
-        } else {
-            // Screen shake or something? 
-            document.getElementById('game-canvas').style.filter = 'invert(1)';
-            setTimeout(() => {
-                document.getElementById('game-canvas').style.filter = 'none';
-            }, 500);
+        // Save state and set to TRAP to freeze player controls
+        this.state = 'TRAP';
+        
+        // Screen invert punchy effect
+        document.getElementById('game-canvas').style.filter = 'invert(1)';
+        setTimeout(() => {
+            document.getElementById('game-canvas').style.filter = 'none';
+        }, 500);
+
+        // Fetch random savage insult
+        const insult = RAGE_INSULTS[Math.floor(Math.random() * RAGE_INSULTS.length)];
+        const overlay = document.getElementById('rage-message-overlay');
+        const textElem = document.getElementById('rage-message-text');
+        
+        if (textElem && overlay) {
+            textElem.innerText = insult;
+            overlay.style.display = 'flex';
+            overlay.classList.remove('hidden');
         }
+
+        // Release pointer lock so player can see screen clearly
+        try {
+            document.exitPointerLock();
+        } catch (e) {}
+
+        // Freeze for exactly 5 seconds
+        setTimeout(() => {
+            if (overlay) {
+                overlay.style.display = 'none';
+                overlay.classList.add('hidden');
+            }
+            
+            if (this.quiz.lives <= 0) {
+                this.onGameOver();
+            } else {
+                this.state = 'PLAYING';
+                const canvas = document.getElementById('game-canvas');
+                if (canvas) {
+                    try {
+                        canvas.requestPointerLock();
+                        canvas.focus();
+                    } catch (err) {}
+                }
+            }
+        }, 5000);
     }
 
     reportFailure() {

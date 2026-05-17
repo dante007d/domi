@@ -17,11 +17,11 @@ for (let i = 1; i <= 25; i++) {
     let size = 11 + (Math.floor((i-1)/2) * 4);
     
     // Increase difficulty for Levels 1-5 only
-    if (i === 1) size = 21;
-    if (i === 2) size = 25;
-    if (i === 3) size = 29;
-    if (i === 4) size = 33;
-    if (i === 5) size = 37;
+    if (i === 1) size = 23;
+    if (i === 2) size = 29;
+    if (i === 3) size = 35;
+    if (i === 4) size = 41;
+    if (i === 5) size = 47;
 
     Levels.push({
         id: i,

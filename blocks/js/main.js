@@ -511,17 +511,28 @@ export class Game {
             this.chests.forEach(c => c.destroy());
             this.chests = [];
             
-            // Real Chest at exit
-            this.chests.push(new Chest(this.renderer.scene, this.maze, null, false));
+            // Randomise the actual chest spawning (anywhere valid, keeping clear of player start)
+            let rx, ry;
+            do {
+                rx = Math.floor(Math.random() * this.maze.size);
+                ry = Math.floor(Math.random() * this.maze.size);
+            } while (this.maze.grid[ry][rx] === 1 || (rx <= 2 && ry <= 2)); // Avoid spawning on/near player start
             
-            // Fake Chests (Traps)
-            const fakeCount = 3; 
+            this.chests.push(new Chest(this.renderer.scene, this.maze, {x: rx, y: ry}, false));
+            
+            // Fake Chests (Traps) - dynamic scaling count with level for increased difficulty
+            const fakeCount = 3 + config.id; 
             for(let i=0; i<fakeCount; i++) {
                 let fx, fy;
                 do {
                     fx = Math.floor(Math.random() * this.maze.size);
                     fy = Math.floor(Math.random() * this.maze.size);
-                } while (this.maze.grid[fy][fx] === 1 || (fx === this.maze.end.x && fy === this.maze.end.y));
+                } while (
+                    this.maze.grid[fy][fx] === 1 || 
+                    (fx <= 2 && fy <= 2) || 
+                    (fx === rx && fy === ry) ||
+                    this.chests.some(c => Math.floor(c.position.x) === fx && Math.floor(c.position.z) === fy)
+                );
                 this.chests.push(new Chest(this.renderer.scene, this.maze, {x: fx, y: fy}, true));
             }
             

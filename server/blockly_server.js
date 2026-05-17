@@ -26,6 +26,15 @@ app.use(cors({
   credentials: true
 }));
 
+// Root routes for status checks
+app.get('/', (req, res) => {
+    res.send('⬡ Domino\'s Effect Blockly Multiplayer Server is running!');
+});
+
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', uptime: process.uptime() });
+});
+
 const gameState = {
     roomCode: "BLOCKLY-MAIN",
     gameStarted: false,

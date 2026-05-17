@@ -1,8 +1,13 @@
 {
   "cleanUrls": true,
   "rewrites": [
+    { "source": "/", "destination": "/blocks/index.html" },
+    { "source": "/index.html", "destination": "/blocks/index.html" },
     { "source": "/admin", "destination": "/blocks/admin.html" },
     { "source": "/admin.html", "destination": "/blocks/admin.html" },
+    { "source": "/shitttt", "destination": "/blocks/shitttt/index.html" },
+    { "source": "/shitttt/", "destination": "/blocks/shitttt/index.html" },
+    { "source": "/shitttt/index.html", "destination": "/blocks/shitttt/index.html" },
     { "source": "/(.*)", "destination": "/blocks/$1" }
   ]
 }

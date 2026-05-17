@@ -5,8 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node index.js",
-    "dev": "node index.js > backend_log.txt 2>&1"
+    "start": "node blockly_server.js",
+    "dev": "node blockly_server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

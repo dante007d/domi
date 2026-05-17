@@ -511,29 +511,31 @@ export class Game {
             this.chests.forEach(c => c.destroy());
             this.chests = [];
             
-            // Randomise the actual chest spawning (anywhere valid, keeping clear of player start)
-            let rx, ry;
-            do {
-                rx = Math.floor(Math.random() * this.maze.size);
-                ry = Math.floor(Math.random() * this.maze.size);
-            } while (this.maze.grid[ry][rx] === 1 || (rx <= 2 && ry <= 2)); // Avoid spawning on/near player start
-            
-            this.chests.push(new Chest(this.renderer.scene, this.maze, {x: rx, y: ry}, false));
-            
-            // Fake Chests (Traps) - set to exactly 4 for a total of 5 chests per level
-            const fakeCount = 4; 
-            for(let i=0; i<fakeCount; i++) {
-                let fx, fy;
-                do {
-                    fx = Math.floor(Math.random() * this.maze.size);
-                    fy = Math.floor(Math.random() * this.maze.size);
-                } while (
-                    this.maze.grid[fy][fx] === 1 || 
-                    (fx <= 2 && fy <= 2) || 
-                    (fx === rx && fy === ry) ||
-                    this.chests.some(c => Math.floor(c.position.x) === fx && Math.floor(c.position.z) === fy)
-                );
-                this.chests.push(new Chest(this.renderer.scene, this.maze, {x: fx, y: fy}, true));
+            // Select exactly 3 distinct valid chest positions in the maze (keeping clear of player start)
+            const candidatePositions = [];
+            while (candidatePositions.length < 3) {
+                const cx = Math.floor(Math.random() * this.maze.size);
+                const cy = Math.floor(Math.random() * this.maze.size);
+                if (this.maze.grid[cy][cx] === 0 && !(cx <= 2 && cy <= 2)) {
+                    if (!candidatePositions.some(p => p.x === cx && p.y === cy)) {
+                        candidatePositions.push({ x: cx, y: cy });
+                    }
+                }
+            }
+
+            // Calculate squared distance from player start (1, 1) to find the farthest one
+            candidatePositions.forEach(p => {
+                p.dist = Math.pow(p.x - 1, 2) + Math.pow(p.y - 1, 2);
+            });
+            // Sort descending (farthest first)
+            candidatePositions.sort((a, b) => b.dist - a.dist);
+
+            // Spawn the actual chest at the farthest position
+            this.chests.push(new Chest(this.renderer.scene, this.maze, candidatePositions[0], false));
+
+            // Spawn the fake chests at the remaining two positions
+            for (let i = 1; i < candidatePositions.length; i++) {
+                this.chests.push(new Chest(this.renderer.scene, this.maze, candidatePositions[i], true));
             }
             
             this.hud.setLevel(config.id);

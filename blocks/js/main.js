@@ -473,7 +473,7 @@ export class Game {
         }
         
         // Handle Blockly Levels (6-10)
-        if (this.levelIndex >= Levels.length) {
+        if (this.levelIndex >= 5) {
             if (window.fetchLevel) {
                 window.fetchLevel(this.levelIndex + 1);
             } else {
@@ -511,9 +511,9 @@ export class Game {
             this.chests.forEach(c => c.destroy());
             this.chests = [];
             
-            // Select exactly 3 distinct valid chest positions in the maze (keeping clear of player start)
+            // Select exactly 2 distinct valid chest positions in the maze (keeping clear of player start)
             const candidatePositions = [];
-            while (candidatePositions.length < 3) {
+            while (candidatePositions.length < 2) {
                 const cx = Math.floor(Math.random() * this.maze.size);
                 const cy = Math.floor(Math.random() * this.maze.size);
                 if (this.maze.grid[cy][cx] === 0 && !(cx <= 2 && cy <= 2)) {
@@ -533,10 +533,8 @@ export class Game {
             // Spawn the actual chest at the farthest position
             this.chests.push(new Chest(this.renderer.scene, this.maze, candidatePositions[0], false));
 
-            // Spawn the fake chests at the remaining two positions
-            for (let i = 1; i < candidatePositions.length; i++) {
-                this.chests.push(new Chest(this.renderer.scene, this.maze, candidatePositions[i], true));
-            }
+            // Spawn the fake chest at the remaining position
+            this.chests.push(new Chest(this.renderer.scene, this.maze, candidatePositions[1], true));
             
             this.hud.setLevel(config.id);
             
@@ -601,7 +599,7 @@ export class Game {
         AudioSystem.playFanfare();
         
         this.levelIndex++;
-        if (this.levelIndex >= Levels.length) {
+        if (this.levelIndex >= 5) {
             this.state = 'WIN';
             document.getElementById('hud').classList.add('hidden');
             document.getElementById('win-screen').classList.remove('hidden');
@@ -612,7 +610,11 @@ export class Game {
                 window.onPhaseComplete();
             } else {
                 setTimeout(() => {
-                    window.location.href = '../index.html?level=6';
+                    if (window.fetchLevel) {
+                        window.fetchLevel(6);
+                    } else {
+                        window.location.href = '../index.html?level=6';
+                    }
                 }, 3000);
             }
         } else {

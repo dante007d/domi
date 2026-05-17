@@ -14,8 +14,38 @@
       --text-muted: #8888AA;
       --terminal-green: #00FF41;
       --phantom-purple: #9D50BB;
-      --ouro-emerald: #008F11;
+      --ouro-emerald: #00FF8A;
       --crt-flicker: rgba(18, 16, 16, 0.1);
+    }
+
+    .ouro-options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 20px;
+      width: 100%;
+    }
+    .ouro-btn {
+      background: rgba(0, 255, 138, 0.05);
+      border: 1px solid var(--ouro-emerald);
+      color: var(--ouro-emerald);
+      padding: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: bold;
+      transition: all 0.2s ease-in-out;
+      border-radius: 4px;
+      text-shadow: 0 0 5px rgba(0,255,138,0.5);
+      box-shadow: 0 0 5px rgba(0,255,138,0.1);
+      text-align: center;
+    }
+    .ouro-btn:hover {
+      background: var(--ouro-emerald);
+      color: black !important;
+      box-shadow: 0 0 15px var(--ouro-emerald);
+      text-shadow: none;
+      transform: translateY(-2px);
     }
 
     * {
@@ -1794,137 +1824,192 @@ int fact(int n) {
         }
       },
       16: {
+        pool: [
+          {
+            q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int a = 5;\n   printf(\"%d %d %d\", a, a++, ++a);\n}",
+            options: ["5 5 7", "5 6 7", "Undefined", "6 6 7"],
+            a: "Undefined"
+          },
+          {
+            q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   char x = 130;\n   printf(\"%d\", x);\n}",
+            options: ["130", "-126", "Depends", "Undefined"],
+            a: "Depends"
+          },
+          {
+            q: "What is the output?\n\n#include<stdio.h>\n#define SQR(x) x*x\nint main(){\n   printf(\"%d\", SQR(2+1));\n}",
+            options: ["9", "5", "6", "Undefined"],
+            a: "5"
+          }
+        ],
         render(container) {
+          const q = this.pool[Game.state.ouroborosLoops % 3];
+          const optionsHtml = q.options.map(opt => `
+            <button onclick="Levels[16].check('${opt}', '${q.a}')" class="ouro-btn">${opt}</button>
+          `).join('');
           container.innerHTML = `
-                        <div class="terminal-block zone-2-theme">
-                            <p>> [SYSTEM] LEVEL 16: THE GATE (FIXED ANCHOR)</p>
-                            <p>> THE SERPENT WATCHES. SOLVE THE RIDDLE OF THE SWITCHES.</p>
-                            <div class="code-block" style="border-left-color:var(--ouro-emerald);">
-                                You have 3 switches downstairs and 3 lightbulbs upstairs.
-                                Each switch controls one bulb.
-                                You can only go upstairs ONCE.
-                                How do you find which switch controls which bulb?
-                            </div>
-                            <div class="input-area" style="flex-direction:column; gap:10px;">
-                                <select id="ans-16" style="background:black; color:var(--ouro-emerald); border:1px solid var(--ouro-emerald); padding:10px; font-family:inherit; width:100%;">
-                                    <option value="">SELECT THE CORRECT STRATEGY...</option>
-                                    <option value="1">Turn 1 on, go up, check.</option>
-                                    <option value="2">Turn 1 on for 5 mins, turn it off, turn 2nd on, go up.</option>
-                                    <option value="3">Turn all on, go up, check.</option>
-                                </select>
-                                <button onclick="Levels[16].check()" style="background:var(--ouro-emerald); color:white;">ENTER THE LOOP</button>
+                        <div class="terminal-block zone-2-theme" style="position:relative;">
+                            <p>> [SYSTEM] LEVEL 16: THE GATE (OUROBOROS LOOP)</p>
+                            <pre class="code-block" style="border-left-color:var(--ouro-emerald); white-space: pre-wrap; font-family: 'JetBrains Mono', monospace; text-align: left; margin: 15px 0; font-size: 0.9rem;">${q.q}</pre>
+                            <div class="ouro-options-grid">
+                                ${optionsHtml}
                             </div>
                         </div>
                     `;
         },
-        check() {
-          const val = document.getElementById('ans-16').value;
-          if (val === "2") Game.next();
+        check(selected, correct) {
+          if (selected === correct) Game.next();
           else Game.fail();
         }
       },
       17: {
         pool: [
-          { q: "Value of (0101 & 0011) in binary?", a: "0001" },
-          { q: "Which basic sorting algorithm has O(n) best case?", a: "insertion sort" },
-          { q: "Hex value for decimal 255?", a: "FF" }
+          {
+            q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int x = 10;\n   printf(\"%d\", x+++10);\n}",
+            options: ["20", "21", "22", "Undefined"],
+            a: "20"
+          },
+          {
+            q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int a = 5;\n   printf(\"%d\", sizeof(a++));\n}",
+            options: ["4", "5", "6", "Undefined"],
+            a: "4"
+          },
+          {
+            q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int x = 3;\n   printf(\"%d\", x+++x);\n}",
+            options: ["6", "7", "8", "Undefined"],
+            a: "7"
+          }
         ],
         render(container) {
           const q = this.pool[Game.state.ouroborosLoops % 3];
+          const optionsHtml = q.options.map(opt => `
+            <button onclick="Levels[17].check('${opt}', '${q.a}')" class="ouro-btn">${opt}</button>
+          `).join('');
           container.innerHTML = `
                         <div class="terminal-block zone-2-theme" style="position:relative;">
                             <p>> [SYSTEM] LEVEL 17: OUROBOROS LOOP</p>
-                            <div class="code-block" style="border-left-color:var(--ouro-emerald);">${q.q}</div>
-                            <div class="input-area">
-                                <input type="text" id="ans-17" placeholder="ANSWER..." autofocus>
-                                <button onclick="Levels[17].check('${q.a}')" style="background:var(--ouro-emerald); color:white;">PROCESS</button>
-                            </div>
-                            <div id="serpent-bg" style="position:absolute; bottom:20px; right:20px; opacity:0.1; transform:rotate(${Game.state.ouroborosLoops * 45}deg); transition:1s;">
-                                <svg width="100" height="100" viewBox="0 0 100 100">
-                                    <circle cx="50" cy="50" r="40" fill="none" stroke="var(--ouro-emerald)" stroke-width="2" stroke-dasharray="5,5" />
-                                    <path d="M50 10 L55 20 L45 20 Z" fill="var(--ouro-emerald)" />
-                                </svg>
+                            <pre class="code-block" style="border-left-color:var(--ouro-emerald); white-space: pre-wrap; font-family: 'JetBrains Mono', monospace; text-align: left; margin: 15px 0; font-size: 0.9rem;">${q.q}</pre>
+                            <div class="ouro-options-grid">
+                                ${optionsHtml}
                             </div>
                         </div>
                     `;
         },
-        check(correct) {
-          const val = document.getElementById('ans-17').value.trim();
-          if (val === correct) Game.next();
+        check(selected, correct) {
+          if (selected === correct) Game.next();
           else Game.fail();
         }
       },
       18: {
         pool: [
-          { q: "Truth table: A=1, B=0. What is A XOR B?", a: "1" },
-          { q: "Which data structure is LIFO?", a: "stack" },
-          { q: "Result of 10 >> 1?", a: "5" }
+          {
+            q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int a = 4;\n   printf(\"%d\", a<<1 + 1);\n}",
+            options: ["8", "9", "16", "Undefined"],
+            a: "16"
+          },
+          {
+            q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int x = 5;\n   if(x = 0)\n      printf(\"A\");\n   else\n      printf(\"B\");\n}",
+            options: ["A", "B", "0", "Error"],
+            a: "B"
+          },
+          {
+            q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int x = 2;\n   printf(\"%d\", 1 << x + 1);\n}",
+            options: ["4", "6", "8", "16"],
+            a: "8"
+          }
         ],
         render(container) {
-          const q = this.pool[(Game.state.ouroborosLoops + 1) % 3];
+          const q = this.pool[Game.state.ouroborosLoops % 3];
+          const optionsHtml = q.options.map(opt => `
+            <button onclick="Levels[18].check('${opt}', '${q.a}')" class="ouro-btn">${opt}</button>
+          `).join('');
           container.innerHTML = `
-                        <div class="terminal-block zone-2-theme">
+                        <div class="terminal-block zone-2-theme" style="position:relative;">
                             <p>> [SYSTEM] LEVEL 18: OUROBOROS LOOP</p>
-                            <div class="code-block" style="border-left-color:var(--ouro-emerald);">${q.q}</div>
-                            <div class="input-area">
-                                <input type="text" id="ans-18" placeholder="ANSWER..." autofocus>
-                                <button onclick="Levels[18].check('${q.a}')" style="background:var(--ouro-emerald); color:white;">PROCESS</button>
+                            <pre class="code-block" style="border-left-color:var(--ouro-emerald); white-space: pre-wrap; font-family: 'JetBrains Mono', monospace; text-align: left; margin: 15px 0; font-size: 0.9rem;">${q.q}</pre>
+                            <div class="ouro-options-grid">
+                                ${optionsHtml}
                             </div>
                         </div>
                     `;
         },
-        check(correct) {
-          const val = document.getElementById('ans-18').value.trim().toLowerCase();
-          if (val === correct) Game.next();
+        check(selected, correct) {
+          if (selected === correct) Game.next();
           else Game.fail();
         }
       },
       19: {
         pool: [
-          { q: "What is the base of Octal?", a: "8" },
-          { q: "Worst case of Quicksort?", a: "O(n^2)" },
-          { q: "1011 in decimal?", a: "11" }
+          {
+            q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   printf(\"%d\", printf(\"Hi\"));\n}",
+            options: ["Hi", "2", "Hi2", "Error"],
+            a: "Hi2"
+          },
+          {
+            q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int x = 5;\n   printf(\"%d\", x & 1 ? 100 : 200);\n}",
+            options: ["0", "1", "100", "200"],
+            a: "100"
+          },
+          {
+            q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int a = 3;\n   printf(\"%d\", a+++a+++a);\n}",
+            options: ["9", "10", "11", "Undefined"],
+            a: "Undefined"
+          }
         ],
         render(container) {
-          const q = this.pool[(Game.state.ouroborosLoops + 2) % 3];
+          const q = this.pool[Game.state.ouroborosLoops % 3];
+          const optionsHtml = q.options.map(opt => `
+            <button onclick="Levels[19].check('${opt}', '${q.a}')" class="ouro-btn">${opt}</button>
+          `).join('');
           container.innerHTML = `
-                        <div class="terminal-block zone-2-theme">
+                        <div class="terminal-block zone-2-theme" style="position:relative;">
                             <p>> [SYSTEM] LEVEL 19: OUROBOROS LOOP</p>
-                            <div class="code-block" style="border-left-color:var(--ouro-emerald);">${q.q}</div>
-                            <div class="input-area">
-                                <input type="text" id="ans-19" placeholder="ANSWER..." autofocus>
-                                <button onclick="Levels[19].check('${q.a}')" style="background:var(--ouro-emerald); color:white;">PROCESS</button>
+                            <pre class="code-block" style="border-left-color:var(--ouro-emerald); white-space: pre-wrap; font-family: 'JetBrains Mono', monospace; text-align: left; margin: 15px 0; font-size: 0.9rem;">${q.q}</pre>
+                            <div class="ouro-options-grid">
+                                ${optionsHtml}
                             </div>
                         </div>
                     `;
         },
-        check(correct) {
-          const val = document.getElementById('ans-19').value.trim();
-          if (val === correct) Game.next();
+        check(selected, correct) {
+          if (selected === correct) Game.next();
           else Game.fail();
         }
       },
       20: {
+        pool: [
+          {
+            q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int x = 7;\n   printf(\"%d\", x ^ 2);\n}",
+            options: ["49", "5", "9", "14"],
+            a: "5"
+          },
+          {
+            q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int x = 1;\n   printf(\"%d\", x == 1 && x++ == 1);\n}",
+            options: ["0", "1", "2", "Undefined"],
+            a: "1"
+          },
+          {
+            q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int x = 0;\n   printf(\"%d\", ++x && x++);\n}",
+            options: ["0", "1", "2", "Undefined"],
+            a: "1"
+          }
+        ],
         render(container) {
+          const q = this.pool[Game.state.ouroborosLoops % 3];
+          const optionsHtml = q.options.map(opt => `
+            <button onclick="Levels[20].check('${opt}', '${q.a}')" class="ouro-btn">${opt}</button>
+          `).join('');
           container.innerHTML = `
-                        <div class="terminal-block zone-2-theme">
-                            <p>> [SYSTEM] LEVEL 20: THE TAIL (FIXED ANCHOR)</p>
-                            <p>> BREAK THE CYCLE. SYNTHESIZE THE KNOWLEDGE.</p>
-                            <div class="code-block" style="border-left-color:var(--ouro-emerald);">
-                                If a loop runs 5 times and each loop 
-                                takes O(n) time, what is the total 
-                                time complexity?
-                            </div>
-                            <div class="input-area">
-                                <input type="text" id="ans-20" placeholder="O(...)" autofocus>
-                                <button onclick="Levels[20].check()" style="background:var(--ouro-emerald); color:white;">SHED SKIN</button>
+                        <div class="terminal-block zone-2-theme" style="position:relative;">
+                            <p>> [SYSTEM] LEVEL 20: THE TAIL (OUROBOROS LOOP)</p>
+                            <pre class="code-block" style="border-left-color:var(--ouro-emerald); white-space: pre-wrap; font-family: 'JetBrains Mono', monospace; text-align: left; margin: 15px 0; font-size: 0.9rem;">${q.q}</pre>
+                            <div class="ouro-options-grid">
+                                ${optionsHtml}
                             </div>
                         </div>
                     `;
         },
-        check() {
-          const val = document.getElementById('ans-20').value.trim();
-          if (val === "O(n)") Game.next();
+        check(selected, correct) {
+          if (selected === correct) Game.next();
           else Game.fail();
         }
       },

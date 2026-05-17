@@ -198,7 +198,7 @@ export class Game {
         // Multiplayer Socket
         const socketUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:3002'
-            : (localStorage.getItem('BACKEND_URL') || 'https://dominos-effect-f.up.railway.app');
+            : (localStorage.getItem('BACKEND_URL') || 'https://domi-4dcx.onrender.com');
         this.socket = io(socketUrl);
         this.teamId = 'team-' + Math.random().toString(36).substr(2, 9);
 

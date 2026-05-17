@@ -39,7 +39,7 @@ function getSocket() {
     if (typeof io !== 'undefined') {
         const socketUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:3002'
-            : (localStorage.getItem('BACKEND_URL') || 'https://dominos-effect-backend.onrender.com');
+            : (localStorage.getItem('BACKEND_URL') || 'https://dominos-effect-production.up.railway.app');
         gameSocket = io(socketUrl);
         gameSocket.emit('join_game', { teamName: localTeamName, teamId: localTeamId });
         return gameSocket;

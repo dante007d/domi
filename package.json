@@ -1,0 +1,10 @@
+{
+  "name": "dominos-effect-root",
+  "version": "1.0.0",
+  "description": "Zero-config root launcher for Domino's Effect multiplayer backend",
+  "type": "module",
+  "scripts": {
+    "preinstall": "cd server && npm install",
+    "start": "cd server && node blockly_server.js"
+  }
+}

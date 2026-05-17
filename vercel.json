@@ -1,0 +1,8 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/admin", "destination": "/blocks/admin.html" },
+    { "source": "/admin.html", "destination": "/blocks/admin.html" },
+    { "source": "/(.*)", "destination": "/blocks/$1" }
+  ]
+}

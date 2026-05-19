@@ -1,10 +1,16 @@
 {
-  "name": "dominos-effect-root",
+  "name": "blocks-maze-game",
   "version": "1.0.0",
-  "description": "Zero-config root launcher for Domino's Effect multiplayer backend",
-  "type": "module",
+  "description": "A Blockly-powered maze game",
+  "main": "game.js",
   "scripts": {
-    "preinstall": "cd server && npm install",
-    "start": "cd server && node blockly_server.js"
+    "start": "npx -y serve .",
+    "dev": "npx -y serve ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "serve": "^14.2.3"
   }
 }

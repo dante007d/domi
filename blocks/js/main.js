@@ -4,6 +4,7 @@ import { GameRenderer } from './renderer.js';
 import { Maze } from './maze.js';
 import { Player } from './player.js';
 import { Chest } from './chest.js';
+import { Monster } from './monster.js';
 import { HUD } from './hud.js';
 import { QuizManager } from './quiz.js';
 import { Levels } from './levels.js';
@@ -178,6 +179,7 @@ export class Game {
         window.game = this; // For debugging
         this.state = 'MENU'; // MENU, PLAYING, QUIZ, GAMEOVER, WIN
         this.levelIndex = 0;
+        this.maxUnlockedLevel = parseInt(localStorage.getItem('domi_unlocked_level') || '1');
         
         // Systems
         const canvas = document.getElementById('game-canvas');
@@ -194,142 +196,43 @@ export class Game {
         this.renderer.buildLevel(this.maze, Levels[0]);
         this.player = new Player(this.renderer.camera, this.maze);
         this.chests = [];
+        this.monster = null;
+        window.gameInstance = this;
         
-        // Multiplayer Socket
-        const socketUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-            ? 'http://localhost:3002'
-            : (localStorage.getItem('BACKEND_URL') || 'https://domi-4dcx.onrender.com');
-        this.socket = io(socketUrl);
-        this.teamId = 'team-' + Math.random().toString(36).substr(2, 9);
-
-        // Listen for mission start
-        this.socket.on('mission_started', () => {
-            if (this.state === 'WAITING') {
-                document.getElementById('waiting-screen').classList.add('hidden');
-                
-                // Audio and pointer lock logic
-                AudioSystem.init();
-                AudioSystem.resume();
-                
-                const canvas = document.getElementById('game-canvas');
-                if (canvas) {
-                    setTimeout(() => {
-                        try {
-                            canvas.requestPointerLock();
-                            canvas.focus();
-                        } catch (err) {
-                            console.warn("Pointer lock request failed:", err);
-                        }
-                    }, 100);
-                }
-
-                this.startLevel(0);
-            }
-        });
-
-        this.socket.on('session_reset', () => {
-            sessionStorage.removeItem('blockly_session');
-            window.location.reload();
-        });
+        // Multiplayer Socket disabled for Single Player Mode
+        this.socket = null;
+        this.teamId = 'player-' + Math.random().toString(36).substr(2, 9);
         
         this.lastTime = performance.now();
         this.setupUI();
         
-        // Session Persistence
-        const savedTeam = sessionStorage.getItem('blockly_session');
-        if (savedTeam) {
-            const { name, id } = JSON.parse(savedTeam);
-            this.teamId = id;
-            const teamSpan = document.getElementById('current-team');
-            if (teamSpan) teamSpan.innerText = name;
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('waiting-screen').classList.remove('hidden');
-            document.getElementById('waiting-team-name').innerText = `TEAM: ${name}`;
-            this.state = 'WAITING';
-            this.socket.emit('join_game', { teamName: name, teamId: id });
-        }
-
         requestAnimationFrame((t) => this.loop(t));
     }
 
     setupUI() {
-        // System Login
-        const btnLogin = document.getElementById('btn-login');
-        const playerPass = document.getElementById('player-pass');
-        const loginScreen = document.getElementById('login-screen');
-        const mainMenu = document.getElementById('main-menu');
-        const loginError = document.getElementById('login-error');
-
-        const attemptLogin = () => {
-            const teamName = document.getElementById('team-name')?.value || "PLAYER";
-            const code = playerPass.value;
-
-            // Admin Bypass Check
-            if (code === '586203') {
-                window.location.href = 'admin.html';
-                return;
-            }
-
-            // Level Selector Code
-            if (code === '661902') {
-                loginScreen.classList.add('hidden');
-                const adminPanel = document.getElementById('admin-panel');
-                adminPanel.classList.remove('hidden');
-                document.getElementById('admin-login-box').classList.add('hidden');
-                document.getElementById('admin-level-selector').classList.remove('hidden');
-                document.getElementById('admin-error').classList.add('hidden');
-                return;
-            }
-
-            if (teamName.trim() === "") {
-                loginError.innerText = "TEAM NAME REQUIRED";
-                loginError.classList.remove('hidden');
+        // Start Game locally
+        document.getElementById('btn-start')?.addEventListener('click', () => {
+            AudioSystem.init();
+            AudioSystem.resume();
+            document.getElementById('main-menu').classList.add('hidden');
+            
+            const canvas = document.getElementById('game-canvas');
+            if (canvas) {
                 setTimeout(() => {
-                    loginError.classList.add('hidden');
-                    loginError.innerText = "INVALID ACCESS CODE";
-                }, 2000);
-                return;
+                    try {
+                        canvas.requestPointerLock();
+                        canvas.focus();
+                    } catch (err) {
+                        console.warn("Pointer lock request failed:", err);
+                    }
+                }, 100);
             }
 
-            if (code === '69692839') { 
-                this.teamId = 'TEAM-' + Math.random().toString(36).substr(2, 9);
-                sessionStorage.setItem('blockly_session', JSON.stringify({ name: teamName, id: this.teamId }));
+            this.startLevel(0);
+        });
 
-                this.teamName = teamName;
-                const teamSpan = document.getElementById('current-team');
-                if (teamSpan) teamSpan.innerText = teamName;
-                
-                const waitingTeamSpan = document.getElementById('waiting-team-name');
-                if (waitingTeamSpan) waitingTeamSpan.innerText = `TEAM: ${teamName}`;
-
-                loginScreen.classList.add('hidden');
-                
-                // Show waiting screen
-                document.getElementById('waiting-screen').classList.remove('hidden');
-                this.state = 'WAITING';
-
-                // Join Multiplayer
-                this.socket.emit('join_game', { teamName, teamId: this.teamId });
-            } else {
-                loginError.classList.remove('hidden');
-                setTimeout(() => loginError.classList.add('hidden'), 2000);
-            }
-        };
-
-        if (btnLogin) btnLogin.addEventListener('click', attemptLogin);
-        if (playerPass) {
-            playerPass.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') attemptLogin();
-            });
-        }
-
-        // Back button on login screen now does nothing or we can hide it
-        document.getElementById('btn-back-login')?.classList.add('hidden');
-
-        // Menu logic removed - consolidated into login screen
-        
         document.getElementById('btn-how')?.addEventListener('click', () => {
-            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-menu').classList.add('hidden');
             document.getElementById('how-to-play').classList.remove('hidden');
         });
 
@@ -340,44 +243,60 @@ export class Game {
 
         document.getElementById('btn-back-how').addEventListener('click', () => {
             document.getElementById('how-to-play').classList.add('hidden');
-            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('main-menu').classList.remove('hidden');
         });
 
         document.getElementById('btn-back-credits').addEventListener('click', () => {
             document.getElementById('credits').classList.add('hidden');
-            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('main-menu').classList.remove('hidden');
         });
 
-        // Admin Access
-        document.getElementById('btn-admin').addEventListener('click', () => {
+        // SELECT LEVEL Start Menu Button
+        document.getElementById('btn-select-level')?.addEventListener('click', () => {
             document.getElementById('main-menu').classList.add('hidden');
             document.getElementById('admin-panel').classList.remove('hidden');
-            document.getElementById('admin-login-box').classList.remove('hidden');
-            document.getElementById('admin-level-selector').classList.add('hidden');
-            document.getElementById('admin-error').classList.add('hidden');
-            document.getElementById('admin-pass').value = '';
+            this.updateLevelSelectorUI();
         });
 
-        document.getElementById('btn-admin-login').addEventListener('click', () => {
-            const pass = document.getElementById('admin-pass').value;
-            if (pass === '2839') {
-                document.getElementById('admin-login-box').classList.add('hidden');
-                document.getElementById('admin-level-selector').classList.remove('hidden');
-                document.getElementById('admin-error').classList.add('hidden');
-            } else {
-                document.getElementById('admin-error').classList.remove('hidden');
+        // HUD Menu button
+        document.getElementById('btn-hud-menu')?.addEventListener('click', () => {
+            this.exitToMainMenu();
+        });
+
+        // Global keydown listeners for Menu exit and B-cheat
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            if (key === 'b') {
+                this.maxUnlockedLevel = 25;
+                localStorage.setItem('domi_unlocked_level', '25');
+                this.updateLevelSelectorUI();
+                
+                // Show a brief unlock notification on screen
+                const alertDiv = document.createElement('div');
+                alertDiv.innerText = "ALL LEVELS UNLOCKED!";
+                alertDiv.style.position = 'absolute';
+                alertDiv.style.top = '10%';
+                alertDiv.style.left = '50%';
+                alertDiv.style.transform = 'translate(-50%, -50%)';
+                alertDiv.style.fontFamily = "'Press Start 2P', monospace";
+                alertDiv.style.color = '#ffaa00';
+                alertDiv.style.background = 'rgba(0,0,0,0.8)';
+                alertDiv.style.border = '2px solid #ffaa00';
+                alertDiv.style.padding = '15px';
+                alertDiv.style.zIndex = '9999';
+                alertDiv.style.fontSize = '1rem';
+                alertDiv.style.textShadow = '2px 2px #000';
+                document.body.appendChild(alertDiv);
+                setTimeout(() => alertDiv.remove(), 2000);
             }
-        });
-
-        document.getElementById('admin-pass').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                document.getElementById('btn-admin-login').click();
+            if (this.state === 'PLAYING' && (key === 'q' || e.key === 'Backspace')) {
+                this.exitToMainMenu();
             }
         });
 
         document.getElementById('btn-back-admin').addEventListener('click', () => {
             document.getElementById('admin-panel').classList.add('hidden');
-            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('main-menu').classList.remove('hidden');
         });
 
         document.querySelectorAll('.level-btn').forEach(btn => {
@@ -434,7 +353,7 @@ export class Game {
         if (btnMainMenu) {
             btnMainMenu.addEventListener('click', () => {
                 document.getElementById('win-screen').classList.add('hidden');
-                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('main-menu').classList.remove('hidden');
                 this.levelIndex = 0;
                 this.quiz.lives = 3;
                 document.querySelectorAll('.skull').forEach(s => s.style.opacity = '1');
@@ -464,8 +383,51 @@ export class Game {
         });
     }
 
+    updateLevelSelectorUI() {
+        document.querySelectorAll('.level-btn').forEach(btn => {
+            const levelIdx = parseInt(btn.getAttribute('data-level'));
+            // levelIdx is 0-indexed (0 to 24), this.maxUnlockedLevel is 1-indexed (1 to 25)
+            if (levelIdx < this.maxUnlockedLevel) {
+                btn.classList.remove('locked-btn');
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+                btn.style.borderColor = '#ffaa00';
+                btn.style.color = '#ffaa00';
+            } else {
+                btn.classList.add('locked-btn');
+                btn.style.opacity = '0.3';
+                btn.style.pointerEvents = 'none';
+                btn.style.borderColor = '#444';
+                btn.style.color = '#444';
+            }
+        });
+    }
+
+    exitToMainMenu() {
+        if (document.pointerLockElement) {
+            try {
+                document.exitPointerLock();
+            } catch(e) {
+                console.warn(e);
+            }
+        }
+        if (this.monster) {
+            this.monster.destroy();
+            this.monster = null;
+        }
+        AudioSystem.stopAmbient();
+        document.getElementById('hud').classList.add('hidden');
+        document.getElementById('quiz-modal').classList.add('hidden');
+        document.getElementById('game-over').classList.add('hidden');
+        document.getElementById('win-screen').classList.add('hidden');
+        document.getElementById('main-menu').classList.remove('hidden');
+        this.state = 'MENU';
+    }
+
     startLevel(index) {
         this.levelIndex = index;
+        this.quiz.lives = 3;
+        document.querySelectorAll('.skull').forEach(s => s.style.opacity = '1');
         
         if (window.parent && window.parent.Game && window.parent !== window) {
             window.parent.Game.state.level = index + 1;
@@ -511,9 +473,9 @@ export class Game {
             this.chests.forEach(c => c.destroy());
             this.chests = [];
             
-            // Select exactly 2 distinct valid chest positions in the maze (keeping clear of player start)
+            // Select exactly 3 distinct valid chest positions in the maze (keeping clear of player start)
             const candidatePositions = [];
-            while (candidatePositions.length < 2) {
+            while (candidatePositions.length < 3) {
                 const cx = Math.floor(Math.random() * this.maze.size);
                 const cy = Math.floor(Math.random() * this.maze.size);
                 if (this.maze.grid[cy][cx] === 0 && !(cx <= 2 && cy <= 2)) {
@@ -533,8 +495,13 @@ export class Game {
             // Spawn the actual chest at the farthest position
             this.chests.push(new Chest(this.renderer.scene, this.maze, candidatePositions[0], false));
 
-            // Spawn the fake chest at the remaining position
+            // Spawn the fake chests at the remaining positions
             this.chests.push(new Chest(this.renderer.scene, this.maze, candidatePositions[1], true));
+            this.chests.push(new Chest(this.renderer.scene, this.maze, candidatePositions[2], true));
+
+            // Spawn Monster
+            if (this.monster) this.monster.destroy();
+            this.monster = new Monster(this.renderer.scene, this.maze, this.player);
             
             this.hud.setLevel(config.id);
             
@@ -599,6 +566,11 @@ export class Game {
         AudioSystem.playFanfare();
         
         this.levelIndex++;
+        if (this.levelIndex + 1 > this.maxUnlockedLevel) {
+            this.maxUnlockedLevel = Math.min(25, this.levelIndex + 1);
+            localStorage.setItem('domi_unlocked_level', this.maxUnlockedLevel.toString());
+            this.updateLevelSelectorUI();
+        }
         if (this.levelIndex >= 5) {
             this.state = 'WIN';
             document.getElementById('hud').classList.add('hidden');
@@ -622,6 +594,74 @@ export class Game {
         }
     }
 
+    shootGlock() {
+        const now = performance.now();
+        this.lastShootTime = this.lastShootTime || 0;
+        if (now - this.lastShootTime < 400) return; // Cooldown
+        this.lastShootTime = now;
+
+        AudioSystem.playPew();
+
+        // Muzzle flash
+        const flash = document.getElementById('muzzle-flash');
+        if (flash) {
+            flash.style.display = 'block';
+            setTimeout(() => flash.style.display = 'none', 80);
+        }
+
+        // Recoil
+        const hand = document.getElementById('player-hand');
+        if (hand) {
+            hand.classList.add('recoil');
+            setTimeout(() => hand.classList.remove('recoil'), 150);
+        }
+
+        // Check Hit on Monster
+        if (this.monster && this.monster.isActive && !this.monster.isDead) {
+            const toMonster = this.monster.position.clone().sub(this.player.camera.position);
+            const dist = toMonster.length();
+            toMonster.normalize();
+            
+            const lookDir = new THREE.Vector3();
+            this.player.camera.getWorldDirection(lookDir);
+            const dot = lookDir.dot(toMonster);
+
+            if (dot > 0.97 && dist < 15) {
+                // Raycast check: verify no walls block the bullet path to the monster
+                let hitWall = false;
+                const step = 0.2;
+                for (let d = 0.2; d < dist; d += step) {
+                    const checkPtX = this.player.camera.position.x + toMonster.x * d;
+                    const checkPtZ = this.player.camera.position.z + toMonster.z * d;
+                    if (this.maze.getCell(checkPtX, checkPtZ) === 1) {
+                        hitWall = true;
+                        break;
+                    }
+                }
+
+                if (!hitWall) {
+                    // Kill monster
+                    this.monster.die();
+
+                    // Show notification
+                    const notif = document.createElement('div');
+                    notif.innerText = "MONSTER ELIMINATED! (8S RESPAWN)";
+                    notif.style.position = 'absolute';
+                    notif.style.top = '25%';
+                    notif.style.left = '50%';
+                    notif.style.transform = 'translate(-50%, -50%)';
+                    notif.style.fontFamily = "'Press Start 2P', cursive";
+                    notif.style.fontSize = '1.2rem';
+                    notif.style.color = '#33ff33';
+                    notif.style.textShadow = '2px 2px #000, 0 0 10px #33ff33';
+                    notif.style.zIndex = 10000;
+                    document.body.appendChild(notif);
+                    setTimeout(() => notif.remove(), 2500);
+                }
+            }
+        }
+    }
+
     onGameOver() {
         document.getElementById('quiz-modal').classList.add('hidden');
         document.getElementById('hud').classList.add('hidden');
@@ -638,11 +678,10 @@ export class Game {
         chest.open();
         AudioSystem.playWrong();
         AudioSystem.playJumpScare(); // Reuse the scary sound for the trap
-        this.reportFailure();
-
-        this.quiz.lives--;
-        document.querySelectorAll('.skull')[this.quiz.lives].style.opacity = '0.2';
         
+        // Respawn the player back to the start of the maze
+        this.player.respawn();
+
         // Save state and set to TRAP to freeze player controls
         this.state = 'TRAP';
         
@@ -652,13 +691,13 @@ export class Game {
             document.getElementById('game-canvas').style.filter = 'none';
         }, 500);
 
-        // Fetch random savage insult
+        // Fetch random savage insult and add alert
         const insult = RAGE_INSULTS[Math.floor(Math.random() * RAGE_INSULTS.length)];
         const overlay = document.getElementById('rage-message-overlay');
         const textElem = document.getElementById('rage-message-text');
         
         if (textElem && overlay) {
-            textElem.innerText = insult;
+            textElem.innerText = "FAKE CHEST TRAP! RESPONDING AT START!\n\n" + insult;
             overlay.style.display = 'flex';
             overlay.classList.remove('hidden');
         }
@@ -675,17 +714,13 @@ export class Game {
                 overlay.classList.add('hidden');
             }
             
-            if (this.quiz.lives <= 0) {
-                this.onGameOver();
-            } else {
-                this.state = 'PLAYING';
-                const canvas = document.getElementById('game-canvas');
-                if (canvas) {
-                    try {
-                        canvas.requestPointerLock();
-                        canvas.focus();
-                    } catch (err) {}
-                }
+            this.state = 'PLAYING';
+            const canvas = document.getElementById('game-canvas');
+            if (canvas) {
+                try {
+                    canvas.requestPointerLock();
+                    canvas.focus();
+                } catch (err) {}
             }
         }, 5000);
     }
@@ -702,6 +737,9 @@ export class Game {
 
         if (this.state === 'PLAYING') {
             this.player.update(dt);
+            if (this.monster) {
+                this.monster.update(dt);
+            }
             
             let anyNear = false;
             this.chests.forEach(c => {
@@ -711,8 +749,8 @@ export class Game {
             
             this.hud.showInteract(anyNear);
             
-            // Minimap shows all chests
-            this.hud.drawMinimap(this.maze, this.player.camera.position, this.chests);
+            // Minimap shows all chests and monster
+            this.hud.drawMinimap(this.maze, this.player.camera.position, this.chests, this.monster);
         }
 
         // Always render if systems are initialized

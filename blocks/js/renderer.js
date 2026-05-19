@@ -65,16 +65,20 @@ export class GameRenderer {
         }
         console.log(`Renderer: Built ${this.walls.length} walls for theme ${levelConfig.theme}`);
 
-        // Floor
+        // Floor (Path)
         const floorGeo = new THREE.PlaneGeometry(maze.size, maze.size);
-        const floorMat = new THREE.MeshBasicMaterial({ color: levelConfig.floorColor });
+        const floorTexture = Textures.getFloorTexture(levelConfig.theme);
+        floorTexture.repeat.set(maze.size, maze.size); // Tiling matching grid scale
+        const floorMat = new THREE.MeshBasicMaterial({ map: floorTexture });
         this.floor = new THREE.Mesh(floorGeo, floorMat);
         this.floor.rotation.x = -Math.PI / 2;
         this.floor.position.set(maze.size / 2, -0.5, maze.size / 2); // Centered at size/2
         this.scene.add(this.floor);
 
         // Ceiling
-        const ceilMat = new THREE.MeshBasicMaterial({ color: 0x050505 });
+        const ceilTexture = Textures.getCeilingTexture(levelConfig.theme);
+        ceilTexture.repeat.set(maze.size, maze.size); // Tiling matching grid scale
+        const ceilMat = new THREE.MeshBasicMaterial({ map: ceilTexture });
         this.ceiling = new THREE.Mesh(floorGeo, ceilMat);
         this.ceiling.rotation.x = Math.PI / 2;
         this.ceiling.position.set(maze.size / 2, 1.5, maze.size / 2); // Centered at size/2

@@ -409,6 +409,7 @@
     <div class="header-item">
       <div id="level-display" class="level-badge">LEVEL 21 / 25</div>
       <div id="zone-display" class="zone-name">COMPILE OR DIE</div>
+      <button id="btn-back-to-menu" style="background: transparent; border: 1px solid var(--accent-cyan); color: var(--accent-cyan); padding: 4px 12px; cursor: pointer; font-size: 13px; font-family: 'JetBrains Mono', monospace; font-weight: bold; border-radius: 2px; transition: all 0.2s;">BACK TO MENU</button>
     </div>
     <div id="global-timer">00:00:00</div>
   </div>
@@ -625,18 +626,29 @@
             this.teamId = 'TEAM-' + Math.random().toString(36).substr(2, 9);
             this.teamName = "PLAYER";
         }
-        if (typeof io !== 'undefined') {
-            const socketUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-                ? 'http://localhost:3002'
-                : (localStorage.getItem('BACKEND_URL') || 'https://domi-4dcx.onrender.com');
-            this.socket = io(socketUrl);
-            this.socket.emit('join_game', { teamName: this.teamName, teamId: this.teamId });
+        this.socket = null;
+
+        // Parse level parameter from URL if present
+        const urlParams = new URLSearchParams(window.location.search);
+        const levelParam = urlParams.get('level');
+        const startLevel = levelParam ? parseInt(levelParam) : 11;
+
+        // Add back to menu listener
+        const btnBack = document.getElementById('btn-back-to-menu');
+        if (btnBack) {
+          btnBack.addEventListener('click', () => {
+            if (window.parent && window.parent.exitSpectrumPhase) {
+              window.parent.exitSpectrumPhase();
+            } else {
+              window.location.href = '../index.html';
+            }
+          });
         }
 
         this.updateUI();
         this.startTimer();
         this.setupDevMode();
-        this.loadLevel(11);
+        this.loadLevel(startLevel);
       },
 
       setupDevMode() {
@@ -1086,7 +1098,30 @@
         });
 
         this.canvas.onmousedown = (e) => {
-          if (!this.editor.active) return;
+          if (!this.editor.active) {
+            const rect = this.canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+            
+            if (e.button === 0) { // Left Click
+              // If click is in upper part of canvas, jump!
+              if (clickY < rect.height * 0.35) {
+                this.keys['Space'] = true;
+              } else {
+                const playerScreenX = this.player.x - this.camX;
+                if (clickX < playerScreenX) {
+                  this.keys['KeyA'] = true;
+                  this.keys['KeyD'] = false;
+                } else {
+                  this.keys['KeyD'] = true;
+                  this.keys['KeyA'] = false;
+                }
+              }
+            } else if (e.button === 2) { // Right Click
+              this.keys['Space'] = true;
+            }
+            return;
+          }
           const rect = this.canvas.getBoundingClientRect();
           const x = Math.round((e.clientX - rect.left + this.camX) / this.editor.snap) * this.editor.snap;
           const y = Math.round((e.clientY - rect.top) / this.editor.snap) * this.editor.snap;
@@ -1099,7 +1134,25 @@
         };
 
         this.canvas.onmousemove = (e) => {
-          if (!this.editor.active) return;
+          if (!this.editor.active) {
+            if (e.buttons === 1) { // Left button held
+              const rect = this.canvas.getBoundingClientRect();
+              const clickX = e.clientX - rect.left;
+              const clickY = e.clientY - rect.top;
+
+              if (clickY >= rect.height * 0.35) {
+                const playerScreenX = this.player.x - this.camX;
+                if (clickX < playerScreenX) {
+                  this.keys['KeyA'] = true;
+                  this.keys['KeyD'] = false;
+                } else {
+                  this.keys['KeyD'] = true;
+                  this.keys['KeyA'] = false;
+                }
+              }
+            }
+            return;
+          }
           const rect = this.canvas.getBoundingClientRect();
           this.editor.currentPos = {
             x: Math.round((e.clientX - rect.left + this.camX) / this.editor.snap) * this.editor.snap,
@@ -1108,7 +1161,13 @@
         };
 
         this.canvas.onmouseup = (e) => {
-          if (!this.editor.active || !this.editor.startPos) return;
+          if (!this.editor.active) {
+            this.keys['KeyA'] = false;
+            this.keys['KeyD'] = false;
+            this.keys['Space'] = false;
+            return;
+          }
+          if (!this.editor.startPos) return;
           if (e.button === 0) {
             const x1 = this.editor.startPos.x;
             const y1 = this.editor.startPos.y;

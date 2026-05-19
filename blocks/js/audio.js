@@ -117,5 +117,36 @@ export const AudioSystem = {
         this.playTone(60, 'sawtooth', 0.5, 0.2);
         this.playTone(70, 'sawtooth', 0.5, 0.2);
         this.playTone(80, 'sawtooth', 0.5, 0.2);
+    },
+
+    playPew() {
+        if (!this.ctx) return;
+        // High pitch explosive saw noise sweeping down quickly
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(10, this.ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.15);
+    },
+
+    playMonsterScream() {
+        if (!this.ctx) return;
+        // Scary high-pitch screech
+        this.playTone(880, 'sawtooth', 0.3, 0.15);
+        setTimeout(() => this.playTone(660, 'sawtooth', 0.3, 0.15), 100);
+        setTimeout(() => this.playTone(440, 'sawtooth', 0.4, 0.15), 200);
+    },
+
+    playHeartbeat() {
+        if (!this.ctx) return;
+        // Low double thud
+        this.playTone(70, 'sine', 0.1, 0.3);
+        setTimeout(() => this.playTone(65, 'sine', 0.15, 0.3), 150);
     }
 };

@@ -2,34 +2,39 @@
 
 export const QuizBank = {
     1: [
-        { q: "What is the remainder when 17 is divided by 5?", options: ["1", "2", "3", "4"], a: 1 },
-        { q: "If 3x = 27, find x².", options: ["9", "27", "81", "3"], a: 2 },
-        { q: "What is the simple interest on Rs 2000 at 10% per annum for 2 years?", options: ["200", "300", "400", "500"], a: 2 },
-        { q: "A shopkeeper gives 10% discount on Rs 500. Find the selling price.", options: ["400", "450", "475", "490"], a: 1 }
+        { q: "A Caesar cipher shifts letters by key K. If 'HELLO' becomes 'KHOOR', what does 'CODE' become?", options: ["EQHG", "FRGH", "GSHI", "ERGH"], a: 1 },
+        { q: "A drawer has 6 black socks and 4 blue socks. What is the minimum number of socks to pull in the dark to guarantee a matching pair?", options: ["2", "3", "4", "5"], a: 1 },
+        { q: "If Alice lies on M/Tu/W and Bob lies on Th/F/Sa, and both say 'Yesterday I lied', what day is it today?", options: ["Monday", "Thursday", "Sunday", "Wednesday"], a: 1 },
+        { q: "What is the next number in this sequence: 2, 9, 28, 65, 126, ?", options: ["197", "217", "225", "254"], a: 1 },
+        { q: "If a binary tree has 15 nodes, what is the maximum possible height (number of edges on the longest root-to-leaf path)?", options: ["3", "7", "14", "15"], a: 2 }
     ],
     2: [
-        { q: "What is the probability of getting an even number on a dice?", options: ["1/6", "1/3", "1/2", "2/3"], a: 2 },
-        { q: "Find the HCF of 18 and 24.", options: ["2", "4", "6", "8"], a: 2 },
-        { q: "If a = 5 and b = 3, find the value of a² + b².", options: ["25", "30", "34", "36"], a: 2 },
-        { q: "A boat travels 24 km downstream in 3 hours. Find its speed downstream.", options: ["6 km/h", "8 km/h", "10 km/h", "12 km/h"], a: 1 }
+        { q: "How many positive integers less than 100 are coprime to 100?", options: ["40", "50", "60", "99"], a: 0 },
+        { q: "You roll two fair six-sided dice. What is the probability that the sum of the numbers rolled is a prime number?", options: ["1/3", "5/12", "7/18", "1/2"], a: 1 },
+        { q: "What is the last digit of 7^2026?", options: ["7", "9", "3", "1"], a: 1 },
+        { q: "Five people run a race. How many different ways can they finish if there are no ties?", options: ["24", "60", "120", "240"], a: 2 },
+        { q: "If a + b = 10 and a² + b² = 58, what is the value of ab?", options: ["15", "18", "21", "24"], a: 2 }
     ],
     3: [
-        { q: "What is the area of a triangle with base 10 cm and height 8 cm?", options: ["20 cm²", "30 cm²", "40 cm²", "50 cm²"], a: 2 },
-        { q: "Find the value of 7 × 8 - 12.", options: ["42", "44", "46", "48"], a: 1 },
-        { q: "Find the next term: 2, 6, 12, 20, 30, ?", options: ["36", "40", "42", "48"], a: 2 },
-        { q: "A number is increased by 25% and becomes 100. What was the original number?", options: ["75", "80", "85", "90"], a: 1 }
+        { q: "In a group of 30 people, 15 play soccer, 12 play basketball, and 5 play both. How many play neither?", options: ["3", "5", "8", "10"], a: 2 },
+        { q: "A script doubles infected servers every hour. If it takes 48 hours to infect the whole network, how long to infect half of it?", options: ["24", "36", "44", "47"], a: 3 },
+        { q: "Solve for x in the equation: log₂(x) + log₂(x - 2) = 3.", options: ["2", "4", "6", "8"], a: 1 },
+        { q: "What is the time complexity of the Master Theorem case where T(N) = 2T(N/2) + O(N)?", options: ["O(N)", "O(N log N)", "O(N²)", "O(log N)"], a: 1 },
+        { q: "What is the hexadecimal representation of the decimal number 250?", options: ["E9", "FA", "FB", "EF"], a: 1 }
     ],
     4: [
-        { q: "What is the value of 15² - 10²?", options: ["100", "125", "150", "175"], a: 1 },
-        { q: "A train moving at 72 km/h covers how many meters in 5 seconds?", options: ["90", "100", "110", "120"], a: 1 },
-        { q: "Find the average of first 10 natural numbers.", options: ["5", "5.5", "6", "6.5"], a: 1 },
-        { q: "How many diagonals does a hexagon have?", options: ["6", "8", "9", "12"], a: 2 }
+        { q: "Monty Hall: Prize behind 3 doors. You pick 1. Host reveals Door 3 is empty. What is your win probability if you switch?", options: ["1/3", "1/2", "2/3", "3/4"], a: 2 },
+        { q: "If f(n) = f(n-1) + f(n-2) with f(0)=0, f(1)=1, what is the value of f(10)?", options: ["34", "55", "89", "144"], a: 1 },
+        { q: "A bag has 3 red marbles and 2 blue. If you draw two without replacement, what is the probability that both are red?", options: ["3/10", "6/25", "2/5", "1/2"], a: 0 },
+        { q: "If 12 machines print 12 books in 12 minutes, how many minutes does it take 100 machines to print 100 books?", options: ["1", "12", "100", "1200"], a: 1 },
+        { q: "What is the minimum weighings needed to find one heavier counterfeit coin among 8 identical-looking coins using a balance?", options: ["2", "3", "4", "8"], a: 0 }
     ],
     5: [
-        { q: "Find the next number: 1, 1, 2, 3, 5, 8, ?", options: ["11", "12", "13", "14"], a: 2 },
-        { q: "What is the value of 2³ + 3²?", options: ["15", "16", "17", "18"], a: 2 },
-        { q: "Find the missing term: 4, 9, 16, 25, ?", options: ["30", "35", "36", "49"], a: 2 },
-        { q: "A man buys an item for Rs 800 and sells it for Rs 1000. Find profit percentage.", options: ["20%", "25%", "30%", "35%"], a: 1 }
+        { q: "A clock shows 3:15. What is the precise angle (in degrees) between the hour and minute hands?", options: ["0°", "5°", "7.5°", "15°"], a: 2 },
+        { q: "If a regular polygon has interior angles of 144 degrees, how many sides does it have?", options: ["8", "10", "12", "15"], a: 1 },
+        { q: "What is the value of the infinite sum: 1/2 + 1/4 + 1/8 + 1/16 + ... ?", options: ["1", "1.5", "2", "Infinite"], a: 0 },
+        { q: "In how many ways can you arrange the letters in the word 'DOMINO'?", options: ["120", "360", "720", "1440"], a: 1 },
+        { q: "A cryptographic hash function must satisfy collision resistance. This means:", options: ["No two inputs produce the same hash", "It is impossible to reverse the hash", "It is hard to find any two inputs with same hash", "It runs in O(1) constant time"], a: 2 }
     ]
 };
 

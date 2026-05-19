@@ -14,6 +14,7 @@ export class Player {
 
         // Mouse look
         this.isPointerLocked = false;
+        this.mouseMoveForward = false;
         
         this.setupInputs();
     }
@@ -28,6 +29,12 @@ export class Player {
             if (e.code === 'KeyA') this.keys.a = true;
             if (e.code === 'KeyD') this.keys.d = true;
             if (this.keys.hasOwnProperty(e.key)) this.keys[e.key] = true;
+            
+            // Space or F to shoot Glock
+            if ((e.code === 'Space' || e.code === 'KeyF') && window.gameInstance && window.gameInstance.state === 'PLAYING') {
+                window.gameInstance.shootGlock();
+                e.preventDefault();
+            }
         });
         document.addEventListener('keyup', (e) => {
             if (!e.key) return;
@@ -57,25 +64,47 @@ export class Player {
 
         // Sync pointer lock state with browser
         document.addEventListener('pointerlockchange', () => {
-            this.isPointerLocked = (document.pointerLockElement === document.body);
+            const canvas = document.getElementById('game-canvas');
+            this.isPointerLocked = (document.pointerLockElement === canvas || document.pointerLockElement === document.body);
+            if (!this.isPointerLocked) {
+                this.mouseMoveForward = false;
+            }
         });
 
-        // Click to regain focus/lock if already in-game
-        document.addEventListener('mousedown', () => {
-            if (window.game && window.game.state === 'PLAYING' && !this.isPointerLocked) {
-                this.lockPointer();
+        // Click to shoot gun if pointer is locked
+        document.addEventListener('mousedown', (e) => {
+            if (window.gameInstance && window.gameInstance.state === 'PLAYING') {
+                if (!this.isPointerLocked) {
+                    this.lockPointer();
+                } else if (e.button === 0) { // Left click
+                    window.gameInstance.shootGlock();
+                }
             }
         });
     }
 
     lockPointer() {
-        document.body.requestPointerLock();
+        const canvas = document.getElementById('game-canvas');
+        if (canvas) {
+            try {
+                canvas.requestPointerLock();
+            } catch (err) {
+                document.body.requestPointerLock();
+            }
+        } else {
+            document.body.requestPointerLock();
+        }
         this.isPointerLocked = true;
     }
 
     unlockPointer() {
-        document.exitPointerLock();
+        try {
+            document.exitPointerLock();
+        } catch (e) {
+            console.warn(e);
+        }
         this.isPointerLocked = false;
+        this.mouseMoveForward = false;
     }
 
     update(dt) {
@@ -133,5 +162,10 @@ export class Player {
                 hand.classList.remove('hand-bob');
             }
         }
+    }
+
+    respawn() {
+        this.camera.position.set(this.maze.start.x + 0.5, 0.5, this.maze.start.y + 0.5);
+        this.camera.rotation.set(0, Math.PI, 0);
     }
 }

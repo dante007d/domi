@@ -1,39 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DOMINO'S EFFECT</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="asstes/style.css">
+    <link rel="stylesheet" href="style-retro.css">
     <!-- Three.js for 3D Phase -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
+
 <body>
     <!-- 3D GAME CONTAINER (Levels 1-5) -->
     <div id="game-container" class="hidden">
         <canvas id="game-canvas" tabindex="0"></canvas>
-        
+
         <!-- HUD -->
         <div id="hud" class="hidden">
             <div id="level-indicator">[ LVL <span id="current-level">1</span>/25 ]</div>
-            <div id="team-display" style="position: absolute; top: 60px; left: 20px; font-family: 'Press Start 2P', cursive; font-size: 0.8rem; color: #ffaa00; text-shadow: 2px 2px #000;">TEAM: <span id="current-team">---</span></div>
+            <div id="team-display"
+                style="display: none; position: absolute; top: 60px; left: 20px; font-family: 'Press Start 2P', cursive; font-size: 0.8rem; color: #ffaa00; text-shadow: 2px 2px #000;">
+                TEAM: <span id="current-team">---</span></div>
             <div id="lives-container">
                 <span class="skull">💀</span>
                 <span class="skull">💀</span>
                 <span class="skull">💀</span>
             </div>
+            <button id="btn-hud-menu" class="menu-btn"
+                style="position: absolute; top: 20px; right: 20px; z-index: 10; font-size: 0.8rem; padding: 5px 15px; width: auto; height: auto; margin: 0; background: rgba(0,0,0,0.6); border: 2px solid #ff0055; color: #ff0055; box-shadow: 0 0 10px rgba(255, 0, 85, 0.3);">MENU</button>
             <canvas id="minimap"></canvas>
             <div id="interact-prompt" class="hidden">Press [E] to Interact</div>
-            <div id="player-hand"></div>
+            <div id="crosshair"></div>
+            <div id="player-hand">
+                <!-- Glock Gun SVG (Perspective View) -->
+                <svg width="250" height="250" viewBox="0 0 100 100"
+                    style="position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%);">
+                    <!-- Hands -->
+                    <ellipse cx="35" cy="90" rx="15" ry="20" fill="#8d5524" stroke="#000" stroke-width="2" />
+                    <ellipse cx="65" cy="90" rx="15" ry="20" fill="#8d5524" stroke="#000" stroke-width="2" />
+                    <!-- Gun Slide (Back view) -->
+                    <rect x="40" y="50" width="20" height="60" fill="#202020" stroke="#000" stroke-width="1.5" />
+                    <rect x="42" y="50" width="16" height="50" fill="#303030" />
+                    <line x1="45" y1="50" x2="45" y2="100" stroke="#111" stroke-width="1" />
+                    <line x1="55" y1="50" x2="55" y2="100" stroke="#111" stroke-width="1" />
+                    <!-- Iron sights -->
+                    <rect x="44" y="47" width="12" height="3" fill="#151515" />
+                    <rect x="49" y="45" width="2" height="3" fill="#ffaa00" />
+                    <rect x="44" y="45" width="2" height="3" fill="#ffaa00" />
+                    <rect x="54" y="45" width="2" height="3" fill="#ffaa00" />
+                    <!-- Muzzle flash -->
+                    <polygon id="muzzle-flash" points="40,40 50,20 60,40 55,45 45,45" fill="#ffcc00"
+                        style="display: none; filter: drop-shadow(0 0 15px #ffaa00);" />
+                </svg>
+            </div>
         </div>
 
         <!-- System Login Screen -->
-        <div id="login-screen" class="overlay screen">
+        <div id="login-screen" class="overlay screen hidden">
             <h1 class="title">DOMINO'S EFFECT</h1>
             <p class="subtitle">ENCRYPTED ACCESS REQUIRED</p>
             <div class="menu-chest"></div>
@@ -49,29 +80,25 @@
             <h1 class="title">STANDBY</h1>
             <p class="subtitle">WAITING FOR MASTER'S ORDER</p>
             <div class="menu-chest"></div>
-            <div id="waiting-team-name" style="font-family: 'Press Start 2P'; color: #ffaa00; margin-top: 1rem;">TEAM: ---</div>
+            <div id="waiting-team-name" style="font-family: 'Press Start 2P'; color: #ffaa00; margin-top: 1rem;">TEAM:
+                ---</div>
         </div>
 
         <!-- Main Menu -->
-        <div id="main-menu" class="overlay screen hidden">
+        <div id="main-menu" class="overlay screen">
             <h1 class="title">DOMINO'S EFFECT</h1>
             <p class="subtitle">Aptitude is the only weapon.</p>
             <div class="menu-chest"></div>
             <button id="btn-start" class="menu-btn">START GAME</button>
-            <button id="btn-admin" class="menu-btn">ADMIN ACCESS</button>
+            <button id="btn-select-level" class="menu-btn">SELECT LEVEL</button>
             <button id="btn-how" class="menu-btn">HOW TO PLAY</button>
             <button id="btn-credits" class="menu-btn">CREDITS</button>
         </div>
 
         <!-- Admin Panel Modal -->
         <div id="admin-panel" class="overlay hidden screen">
-            <h2>ADMIN ACCESS</h2>
-            <div id="admin-login-box">
-                <p>Enter Authorization Code:</p>
-                <input type="password" id="admin-pass" class="admin-input" placeholder="****">
-                <button id="btn-admin-login" class="menu-btn">LOGIN</button>
-            </div>
-            <div id="admin-level-selector" class="hidden">
+            <h2>SELECT LEVEL</h2>
+            <div id="admin-level-selector">
                 <p>Select Deployment Level:</p>
                 <div class="level-grid">
                     <button class="level-btn" data-level="0">01</button>
@@ -101,7 +128,6 @@
                     <button class="level-btn" data-level="24">25</button>
                 </div>
             </div>
-            <p id="admin-error" class="text-red hidden">INVALID CODE</p>
             <button id="btn-back-admin" class="menu-btn">BACK</button>
         </div>
 
@@ -120,22 +146,27 @@
         <!-- Credits Modal -->
         <div id="credits" class="overlay hidden screen">
             <h2>CREDITS</h2>
-            <p>Built with Three.js</p>
-            <p>Inspired by DOOM (1993)</p>
-            <p>Powered by curiosity.</p>
+            <p style="line-height: 1.6; margin-bottom: 20px; max-width: 400px; text-align: center;">This game is
+                developed by the dev club members of the BEC CREATIVE SPECTRUM ____DANTE</p>
             <button id="btn-back-credits" class="menu-btn">BACK</button>
         </div>
 
         <!-- Quiz Modal -->
         <div id="quiz-modal" class="overlay hidden screen">
-            <div id="timer-bar-container"><div id="timer-bar"></div></div>
+            <div id="timer-bar-container">
+                <div id="timer-bar"></div>
+            </div>
             <div class="chest-open-animation"></div>
             <div id="question-text">Question loading...</div>
             <div id="options-container">
-                <button class="option-btn" data-opt="0"><span class="opt-label">A</span> <span class="opt-text">Option A</span></button>
-                <button class="option-btn" data-opt="1"><span class="opt-label">B</span> <span class="opt-text">Option B</span></button>
-                <button class="option-btn" data-opt="2"><span class="opt-label">C</span> <span class="opt-text">Option C</span></button>
-                <button class="option-btn" data-opt="3"><span class="opt-label">D</span> <span class="opt-text">Option D</span></button>
+                <button class="option-btn" data-opt="0"><span class="opt-label">A</span> <span class="opt-text">Option
+                        A</span></button>
+                <button class="option-btn" data-opt="1"><span class="opt-label">B</span> <span class="opt-text">Option
+                        B</span></button>
+                <button class="option-btn" data-opt="2"><span class="opt-label">C</span> <span class="opt-text">Option
+                        C</span></button>
+                <button class="option-btn" data-opt="3"><span class="opt-label">D</span> <span class="opt-text">Option
+                        D</span></button>
             </div>
             <div id="quiz-feedback" class="hidden"></div>
         </div>
@@ -159,10 +190,40 @@
         </div>
 
         <!-- Rage Message Overlay for Fake Chests -->
-        <div id="rage-message-overlay" class="overlay hidden screen" style="display: none; background: rgba(10, 0, 0, 0.95); flex-direction: column; justify-content: center; align-items: center; text-align: center; border: 4px solid #ff3333; box-shadow: 0 0 50px rgba(255, 0, 0, 0.6); padding: 30px; z-index: 9999;">
-            <div style="font-family: 'Press Start 2P', cursive; font-size: 1.8rem; color: #ff3333; margin-bottom: 2rem; text-shadow: 3px 3px #000; letter-spacing: 2px;">⚠️ SYSTEM BREACH ⚠️</div>
-            <p id="rage-message-text" style="font-family: 'Share Tech Mono', monospace; font-size: 1.6rem; color: #ffffff; max-width: 80%; line-height: 1.5; border-left: 5px solid #ff3333; padding-left: 20px; text-shadow: 1px 1px 10px rgba(255, 255, 255, 0.3);">YOU BRING THE TACTICAL VALUE OF A SMOKE DETECTOR WITHOUT BATTERIES.</p>
-            <div style="font-family: 'Press Start 2P', cursive; font-size: 0.8rem; color: #666; margin-top: 2rem; letter-spacing: 1px;">[ REBOOTING COGNITIVE MODULES... ]</div>
+        <div id="rage-message-overlay" class="overlay hidden screen"
+            style="display: none; background: rgba(10, 0, 0, 0.95); flex-direction: column; justify-content: center; align-items: center; text-align: center; border: 4px solid #ff3333; box-shadow: 0 0 50px rgba(255, 0, 0, 0.6); padding: 30px; z-index: 9999;">
+            <div
+                style="font-family: 'Press Start 2P', cursive; font-size: 1.8rem; color: #ff3333; margin-bottom: 2rem; text-shadow: 3px 3px #000; letter-spacing: 2px;">
+                ⚠️ SYSTEM BREACH ⚠️</div>
+            <p id="rage-message-text"
+                style="font-family: 'Share Tech Mono', monospace; font-size: 1.6rem; color: #ffffff; max-width: 80%; line-height: 1.5; border-left: 5px solid #ff3333; padding-left: 20px; text-shadow: 1px 1px 10px rgba(255, 255, 255, 0.3);">
+                YOU BRING THE TACTICAL VALUE OF A SMOKE DETECTOR WITHOUT BATTERIES.</p>
+            <div
+                style="font-family: 'Press Start 2P', cursive; font-size: 0.8rem; color: #666; margin-top: 2rem; letter-spacing: 1px;">
+                [ REBOOTING COGNITIVE MODULES... ]</div>
+        </div>
+
+        <!-- Jumpscare Overlay -->
+        <div id="jumpscare-overlay" class="overlay hidden screen"
+            style="display: none; background: #000; flex-direction: column; justify-content: center; align-items: center; z-index: 100000; overflow: hidden;">
+            <div
+                style="font-family: 'Press Start 2P', cursive; font-size: 3rem; color: #ff0000; text-shadow: 0 0 20px #ff0000; margin-bottom: 2rem;">
+                ⚠️ RUN ⚠️</div>
+            <svg width="400" height="400" viewBox="0 0 100 100" style="filter: drop-shadow(0 0 30px #ff0000);">
+                <circle cx="50" cy="50" r="45" fill="#110000" stroke="#ff0000" stroke-width="2" />
+                <circle cx="35" cy="40" r="10" fill="#ff0000" />
+                <circle cx="65" cy="40" r="10" fill="#ff0000" />
+                <circle cx="35" cy="40" r="3" fill="#000" />
+                <circle cx="65" cy="40" r="3" fill="#000" />
+                <ellipse cx="50" cy="70" rx="15" ry="20" fill="#000" />
+                <path d="M 38 60 L 42 66 L 46 60 L 50 66 L 54 60 L 58 66 L 62 60" fill="none" stroke="#fff"
+                    stroke-width="2" />
+                <path d="M 38 80 L 42 74 L 46 80 L 50 74 L 54 80 L 58 74 L 62 80" fill="none" stroke="#fff"
+                    stroke-width="2" />
+            </svg>
+            <div
+                style="font-family: 'Share Tech Mono', monospace; font-size: 2rem; color: #ff3333; margin-top: 2rem; text-shadow: 0 0 10px #ff0000;">
+                THE BEAST CONSUMED YOU.</div>
         </div>
 
         <div class="scanlines"></div>
@@ -178,10 +239,8 @@
             </div>
             <nav class="controls">
                 <div class="file-upload-wrapper">
-                    <button id="adminAuthBtn" class="btn secondary-btn" style="color: #ea4335; border-color: #fce8e6; background-color: #fce8e6;">
-                        <span class="icon">🔒</span> Admin
-                    </button>
-                    <select id="adminLevelSelect" class="btn secondary-btn" style="display: none; appearance: none; padding-right: 2rem; background: url('data:image/svg+xml;utf8,<svg fill=%22%233c4043%22 height=%2224%22 viewBox=%220 0 24 24%22 width=%2224%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M7 10l5 5 5-5z%22/><path d=%22M0 0h24v24H0z%22 fill=%22none%22/></svg>') no-repeat right 0.5rem center / 1.5rem; background-color: white; cursor: pointer;">
+                    <select id="adminLevelSelect" class="btn secondary-btn"
+                        style="appearance: none; padding-right: 2rem; background: url('data:image/svg+xml;utf8,<svg fill=%22%233c4043%22 height=%2224%22 viewBox=%220 0 24 24%22 width=%2224%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M7 10l5 5 5-5z%22/><path d=%22M0 0h24v24H0z%22 fill=%22none%22/></svg>') no-repeat right 0.5rem center / 1.5rem; background-color: white; cursor: pointer;">
                         <option value="6">Level 6</option>
                         <option value="7">Level 7</option>
                         <option value="8">Level 8</option>
@@ -216,9 +275,13 @@
                 <button id="resetBtn" class="btn secondary-btn">
                     <span class="icon">🔄</span> Reset
                 </button>
+                <button id="btn-blockly-back" class="btn secondary-btn"
+                    style="border: 1px solid #ff0055; color: #ff0055; margin-left: 10px;">
+                    <span class="icon">🏠</span> Back to Menu
+                </button>
             </nav>
         </header>
-        
+
         <main class="game-layout">
             <section id="gameArea" class="viewport-section">
                 <div class="viewport-header">
@@ -241,7 +304,9 @@
             </section>
 
             <section class="help-section">
-                <div class="help-header"><h2>Pro Tips</h2></div>
+                <div class="help-header">
+                    <h2>Pro Tips</h2>
+                </div>
                 <div class="help-content">
                     <div class="tip-card">
                         <h3>The 25-Level Roadmap</h3>
@@ -255,8 +320,12 @@
     <!-- Blockly Toolbox -->
     <xml id="toolbox" style="display: none">
         <block type="move_forward"></block>
-        <block type="maze_turn"><field name="DIR">turnLeft</field></block>
-        <block type="maze_turn"><field name="DIR">turnRight</field></block>
+        <block type="maze_turn">
+            <field name="DIR">turnLeft</field>
+        </block>
+        <block type="maze_turn">
+            <field name="DIR">turnRight</field>
+        </block>
         <block type="maze_until"></block>
         <block type="maze_if"></block>
         <block type="maze_ifElse"></block>
@@ -265,8 +334,15 @@
     <div id="victoryModal" class="modal-overlay">
         <div class="modal-content">
             <h2>🎉 Level Complete! 🎉</h2>
-            <button id="nextLevelBtn" class="btn primary-btn" style="margin-top: 1.5rem; width: 100%; justify-content: center;">Next Level</button>
+            <button id="nextLevelBtn" class="btn primary-btn"
+                style="margin-top: 1.5rem; width: 100%; justify-content: center;">Next Level</button>
         </div>
+    </div>
+
+    <!-- SPECTRUM CHALLENGE CONTAINER (Levels 11-25) -->
+    <div id="spectrum-container" class="hidden"
+        style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; border: none; background: #080810;">
+        <iframe id="spectrum-iframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
     </div>
 
     <!-- Google Blockly -->
@@ -274,8 +350,9 @@
     <script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
     <script src="https://unpkg.com/blockly/msg/en.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    
+
     <script src="js/blocks.js"></script>
     <script type="module" src="js/game.js"></script>
 </body>
+
 </html>

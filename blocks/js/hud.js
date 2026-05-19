@@ -20,11 +20,11 @@ export class HUD {
         document.getElementById('current-level').innerText = levelNum;
     }
 
-    update(playerPos, maze, chests) {
-        this.drawMinimap(maze, playerPos, chests);
+    update(playerPos, maze, chests, monster) {
+        this.drawMinimap(maze, playerPos, chests, monster);
     }
 
-    drawMinimap(maze, playerPos, chests) {
+    drawMinimap(maze, playerPos, chests, monster) {
         if (!this.isVisible) return;
 
         // Resize canvas based on maze size
@@ -66,6 +66,23 @@ export class HUD {
                 this.ctx.stroke();
                 this.ctx.shadowBlur = 0;
             });
+        }
+
+        // Draw monster (Red skull)
+        if (monster && !monster.isDead) {
+            const mx = monster.position.x * this.mapScale;
+            const mz = monster.position.z * this.mapScale;
+            
+            this.ctx.fillStyle = '#ff0000';
+            this.ctx.beginPath();
+            this.ctx.arc(mx, mz, this.mapScale / 1.2, 0, Math.PI * 2);
+            this.ctx.fill();
+            
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.font = '10px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillText('💀', mx, mz);
         }
 
         // Draw player

@@ -14,36 +14,6 @@ let localTeamId = null;
 let localTeamName = null;
 
 function getSocket() {
-    if (window.game && window.game.socket) {
-        return window.game.socket;
-    }
-    if (gameSocket) return gameSocket;
-    
-    const savedTeam = sessionStorage.getItem('blockly_session');
-    if (savedTeam) {
-        try {
-            const session = JSON.parse(savedTeam);
-            localTeamId = session.id;
-            localTeamName = session.name;
-        } catch (err) {
-            console.error("Error parsing blockly_session:", err);
-        }
-    }
-    
-    if (!localTeamId) {
-        localTeamId = 'team-' + Math.random().toString(36).substr(2, 9);
-        localTeamName = 'PLAYER';
-        localStorage.setItem('blockly_session', JSON.stringify({ name: localTeamName, id: localTeamId }));
-    }
-    
-    if (typeof io !== 'undefined') {
-        const socketUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-            ? 'http://localhost:3002'
-            : (localStorage.getItem('BACKEND_URL') || 'https://domi-4dcx.onrender.com');
-        gameSocket = io(socketUrl);
-        gameSocket.emit('join_game', { teamName: localTeamName, teamId: localTeamId });
-        return gameSocket;
-    }
     return null;
 }
 
@@ -56,27 +26,36 @@ const appWrapper = document.querySelector('.app-wrapper');
 const gameContainer = document.getElementById('game-container');
 
 // UI Toggling
-function switchToPhase(phase) { // 'MAZE' or 'BLOCKLY'
+function switchToPhase(phase) { // 'MAZE' or 'BLOCKLY' or 'SPECTRUM'
+    const spectrumContainer = document.getElementById('spectrum-container');
     if (phase === 'MAZE') {
         appWrapper.classList.add('hidden');
+        if (spectrumContainer) spectrumContainer.classList.add('hidden');
         gameContainer.classList.remove('hidden');
         document.body.classList.add('maze-mode');
         document.documentElement.classList.add('maze-mode');
         if (!mazeGameInstance) {
             mazeGameInstance = new MazeGame();
         }
-    } else {
+    } else if (phase === 'BLOCKLY') {
         gameContainer.classList.add('hidden');
+        if (spectrumContainer) spectrumContainer.classList.add('hidden');
         appWrapper.classList.remove('hidden');
         document.body.classList.remove('maze-mode');
         document.documentElement.classList.remove('maze-mode');
+    } else if (phase === 'SPECTRUM') {
+        gameContainer.classList.add('hidden');
+        appWrapper.classList.add('hidden');
+        if (spectrumContainer) spectrumContainer.classList.remove('hidden');
+        document.body.classList.remove('maze-mode');
+        document.documentElement.classList.remove('maze-mode');
+    }
         // Stop any 3D ambient audio if needed
         if (window.AudioContext) {
             // AudioSystem logic is internal to MazeGame, but we can call methods if exposed
         }
         if (window.initBlockly) window.initBlockly();
     }
-}
 
 // Phase Completion Handler
 window.onPhaseComplete = () => {
@@ -103,12 +82,23 @@ fileInput?.addEventListener('change', (e) => {
     }
 });
 
+window.exitSpectrumPhase = () => {
+    switchToPhase('MAZE');
+    if (mazeGameInstance) {
+        mazeGameInstance.showMenu();
+    }
+};
+
 // Auto-load a specific level
 async function fetchLevel(levelNumber) {
     window.fetchLevel = fetchLevel;
 
     if (levelNumber > 10) {
-        window.location.href = 'shitttt/index.html';
+        switchToPhase('SPECTRUM');
+        const iframe = document.getElementById('spectrum-iframe');
+        if (iframe) {
+            iframe.src = 'shitttt/index.html?level=' + levelNumber;
+        }
         return;
     }
 
@@ -303,10 +293,14 @@ function updateBotVisuals() {
     const botEl = document.getElementById('bot');
     const spriteEl = document.getElementById('pegman');
     if (!botEl || !levelData || !spriteEl) return;
-    const cellWidth = gridContainer.offsetWidth / levelData.cols;
-    const cellHeight = gridContainer.offsetHeight / levelData.rows;
-    botEl.style.left = `${(botState.x - 1) * cellWidth + (cellWidth - 49) / 2}px`;
-    botEl.style.top = `${(botState.y - 1) * cellHeight + (cellHeight - 52) / 2}px`;
+    
+    const cellEl = document.getElementById(`cell-${botState.x}-${botState.y}`);
+    if (cellEl) {
+        const leftPos = cellEl.offsetLeft + (cellEl.offsetWidth - 49) / 2;
+        const topPos = cellEl.offsetTop + (cellEl.offsetHeight - 52) / 2;
+        botEl.style.left = `${leftPos}px`;
+        botEl.style.top = `${topPos}px`;
+    }
     spriteEl.setAttribute('x', -(botState.orientation * 4 * 49));
 }
 
@@ -336,6 +330,14 @@ runBtn?.addEventListener('click', async () => {
 });
 
 window.addEventListener('load', () => {
+    // Add Blockly Back button listener
+    document.getElementById('btn-blockly-back')?.addEventListener('click', () => {
+        switchToPhase('MAZE');
+        if (mazeGameInstance) {
+            mazeGameInstance.exitToMainMenu();
+        }
+    });
+
     const urlParams = new URLSearchParams(window.location.search);
     const levelParam = urlParams.get('level');
     if (levelParam) {
@@ -350,17 +352,7 @@ document.getElementById('nextLevelBtn')?.addEventListener('click', () => {
     fetchLevel(currentLevelIndex + 1);
 });
 
-// Admin Authorization Logic for Blockly Phase
-document.getElementById('adminAuthBtn')?.addEventListener('click', () => {
-    const code = prompt("Enter Admin Authorization Code:");
-    if (code === '6969') {
-        document.getElementById('adminAuthBtn').style.display = 'none';
-        document.getElementById('adminLevelSelect').style.display = 'inline-block';
-        alert("ACCESS GRANTED. LEVEL SELECTOR ACTIVATED.");
-    } else {
-        alert("ACCESS DENIED.");
-    }
-});
+
 
 // Admin Level Selector Logic
 document.getElementById('adminLevelSelect')?.addEventListener('change', (e) => {

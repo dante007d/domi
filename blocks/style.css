@@ -232,7 +232,7 @@ body {
     position: absolute;
     width: 49px; 
     height: 52px;
-    transition: left 0.3s ease-in-out, top 0.3s ease-in-out;
+    transition: left 0.2s ease-in-out, top 0.2s ease-in-out;
     z-index: 10;
 }
 

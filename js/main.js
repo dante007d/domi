@@ -266,6 +266,11 @@ export class Game {
         // Global keydown listeners for Menu exit and B-cheat
         document.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
+            if (key === '`') {
+                document.getElementById('main-menu').classList.add('hidden');
+                document.getElementById('admin-panel').classList.remove('hidden');
+                this.updateLevelSelectorUI();
+            }
             if (key === 'b') {
                 this.maxUnlockedLevel = 20;
                 localStorage.setItem('domi_unlocked_level', '20');

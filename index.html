@@ -38,27 +38,29 @@
                 style="position: absolute; top: 20px; right: 20px; z-index: 10; font-size: 0.8rem; padding: 5px 15px; width: auto; height: auto; margin: 0; background: rgba(0,0,0,0.6); border: 2px solid #ff0055; color: #ff0055; box-shadow: 0 0 10px rgba(255, 0, 85, 0.3);">MENU</button>
             <canvas id="minimap"></canvas>
             <div id="interact-prompt" class="hidden">Press [E] to Interact</div>
-            <div id="crosshair"></div>
+            <div id="crosshair" class="hidden"></div>
             <div id="player-hand">
-                <!-- Glock Gun SVG (Perspective View) -->
-                <svg width="250" height="250" viewBox="0 0 100 100"
-                    style="position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%);">
-                    <!-- Hands -->
-                    <ellipse cx="35" cy="90" rx="15" ry="20" fill="#8d5524" stroke="#000" stroke-width="2" />
-                    <ellipse cx="65" cy="90" rx="15" ry="20" fill="#8d5524" stroke="#000" stroke-width="2" />
-                    <!-- Gun Slide (Back view) -->
-                    <rect x="40" y="50" width="20" height="60" fill="#202020" stroke="#000" stroke-width="1.5" />
-                    <rect x="42" y="50" width="16" height="50" fill="#303030" />
-                    <line x1="45" y1="50" x2="45" y2="100" stroke="#111" stroke-width="1" />
-                    <line x1="55" y1="50" x2="55" y2="100" stroke="#111" stroke-width="1" />
-                    <!-- Iron sights -->
-                    <rect x="44" y="47" width="12" height="3" fill="#151515" />
-                    <rect x="49" y="45" width="2" height="3" fill="#ffaa00" />
-                    <rect x="44" y="45" width="2" height="3" fill="#ffaa00" />
-                    <rect x="54" y="45" width="2" height="3" fill="#ffaa00" />
-                    <!-- Muzzle flash -->
-                    <polygon id="muzzle-flash" points="40,40 50,20 60,40 55,45 45,45" fill="#ffcc00"
-                        style="display: none; filter: drop-shadow(0 0 15px #ffaa00);" />
+                <!-- Hands Only (No Gun, Retro Running Style) -->
+                <svg width="400" height="250" viewBox="0 0 200 100"
+                    style="position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);">
+                    <!-- Left Fist/Hand -->
+                    <g transform="translate(25, 45)">
+                        <!-- Sleeve/Arm -->
+                        <path d="M 5 60 L 12 25 Q 18 18 25 22 L 32 60 Z" fill="#440000" stroke="#000" stroke-width="2" />
+                        <!-- Fist -->
+                        <circle cx="18" cy="22" r="10" fill="#8d5524" stroke="#000" stroke-width="2" />
+                        <!-- Thumb detail -->
+                        <circle cx="22" cy="18" r="3" fill="#a06535" />
+                    </g>
+                    <!-- Right Fist/Hand -->
+                    <g transform="translate(135, 45)">
+                        <!-- Sleeve/Arm -->
+                        <path d="M 35 60 L 28 25 Q 22 18 15 22 L 8 60 Z" fill="#440000" stroke="#000" stroke-width="2" />
+                        <!-- Fist -->
+                        <circle cx="22" cy="22" r="10" fill="#8d5524" stroke="#000" stroke-width="2" />
+                        <!-- Thumb detail -->
+                        <circle cx="18" cy="18" r="3" fill="#a06535" />
+                    </g>
                 </svg>
             </div>
         </div>
@@ -84,16 +86,65 @@
                 ---</div>
         </div>
 
+        <!-- Name Entry Overlay -->
+        <div id="name-prompt-overlay" class="overlay screen">
+            <h1 class="title" style="font-size: 2rem; text-shadow: 0 0 10px #ff0055; margin-bottom: 20px;">ENTER YOUR NAME</h1>
+            <p class="subtitle" style="font-size: 0.8rem; margin-bottom: 20px;">Identify yourself, agent.</p>
+            <input type="text" id="player-name-input" placeholder="YOUR NAME..." maxlength="15" style="
+                background: rgba(0,0,0,0.9);
+                border: 2px solid #ff0055;
+                color: #ff0055;
+                font-family: 'Press Start 2P', monospace;
+                font-size: 1rem;
+                padding: 15px;
+                text-align: center;
+                margin-bottom: 25px;
+                width: 280px;
+                outline: none;
+                box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+                text-transform: uppercase;
+            " />
+            <button id="btn-submit-name" class="menu-btn">ENTER LABYRINTH</button>
+        </div>
+
         <!-- Main Menu -->
-        <div id="main-menu" class="overlay screen">
+        <div id="main-menu" class="overlay screen hidden">
             <h1 class="title">DOMINO'S EFFECT</h1>
             <p class="subtitle">Aptitude is the only weapon.</p>
+            <div id="menu-player-display" style="font-family: 'Press Start 2P', monospace; color: #ffaa00; margin-bottom: 15px; font-size: 0.8rem;">PLAYER: ---</div>
             <div class="menu-chest"></div>
             <button id="btn-start" class="menu-btn">START GAME</button>
             <button id="btn-select-level" class="menu-btn">SELECT LEVEL</button>
+            <button id="btn-leaderboard" class="menu-btn">LEADERBOARD</button>
             <button id="btn-how" class="menu-btn">HOW TO PLAY</button>
             <button id="btn-credits" class="menu-btn">CREDITS</button>
+            <button id="btn-change-name" class="menu-btn" style="background: transparent; border: 1px dashed #ff0055; color: #ff0055; font-size: 0.65rem; margin-top: 15px; width: 200px;">CHANGE NAME</button>
+            <button id="btn-reset-run" class="menu-btn" style="background: transparent; border: 1px dashed #ff0055; color: #ff0055; font-size: 0.65rem; margin-top: 5px; width: 200px;">RESET RUN</button>
         </div>
+
+        <!-- Leaderboard Modal -->
+        <div id="leaderboard-modal" class="overlay hidden screen">
+            <h2>LEADERBOARD</h2>
+            <div id="leaderboard-container" style="
+                max-height: 250px;
+                overflow-y: auto;
+                width: 440px;
+                max-width: 90vw;
+                margin: 15px auto;
+                border: 2px solid #ff0055;
+                background: rgba(0,0,0,0.85);
+                box-shadow: 0 0 15px rgba(255,0,85,0.3);
+                padding: 10px;
+                font-family: 'Press Start 2P', monospace;
+                font-size: 0.6rem;
+                line-height: 1.8;
+                box-sizing: border-box;
+            ">
+                <div style="text-align: center; color: #ff0055;">LOADING SCORES...</div>
+            </div>
+            <button id="btn-back-leaderboard" class="menu-btn">BACK</button>
+        </div>
+
 
         <!-- Admin Panel Modal -->
         <div id="admin-panel" class="overlay hidden screen">
@@ -121,11 +172,6 @@
                     <button class="level-btn" data-level="17">18</button>
                     <button class="level-btn" data-level="18">19</button>
                     <button class="level-btn" data-level="19">20</button>
-                    <button class="level-btn" data-level="20">21</button>
-                    <button class="level-btn" data-level="21">22</button>
-                    <button class="level-btn" data-level="22">23</button>
-                    <button class="level-btn" data-level="23">24</button>
-                    <button class="level-btn" data-level="24">25</button>
                 </div>
             </div>
             <button id="btn-back-admin" class="menu-btn">BACK</button>
@@ -138,6 +184,9 @@
             <p>Mouse / Left & Right - Look</p>
             <p>M - Toggle Minimap</p>
             <p>E - Interact</p>
+            <p>Space - use gun</p>
+            <p> Q - back to menu</p>
+
             <p><br>Find the hidden chest in each level.</p>
             <p>Solve the aptitude puzzle inside to proceed.</p>
             <button id="btn-back-how" class="menu-btn">BACK</button>
@@ -147,7 +196,7 @@
         <div id="credits" class="overlay hidden screen">
             <h2>CREDITS</h2>
             <p style="line-height: 1.6; margin-bottom: 20px; max-width: 400px; text-align: center;">This game is
-                developed by the dev club members of the BEC CREATIVE SPECTRUM ____DANTE</p>
+                developed by  members of the BEC CREATIVE SPECTRUM and <br> DANTE (VINOD) <br> SURAJ <br> ABHIGNYA <br> GOURAV <br> ABHISHEK  </p>
             <button id="btn-back-credits" class="menu-btn">BACK</button>
         </div>
 
@@ -310,7 +359,7 @@
                 <div class="help-content">
                     <div class="tip-card">
                         <h3>The 25-Level Roadmap</h3>
-                        <p>Logic Phase (Levels 6-10). More coming for 11-25!</p>
+                        <p>Logic Phase (Levels 11-25).</p>
                     </div>
                 </div>
             </section>
@@ -352,6 +401,7 @@
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
     <script src="js/blocks.js"></script>
+    <script type="module" src="js/leaderboard.js"></script>
     <script type="module" src="js/game.js"></script>
 </body>
 

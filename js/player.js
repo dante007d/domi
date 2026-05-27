@@ -30,11 +30,7 @@ export class Player {
             if (e.code === 'KeyD') this.keys.d = true;
             if (this.keys.hasOwnProperty(e.key)) this.keys[e.key] = true;
             
-            // Space or F to shoot Glock
-            if ((e.code === 'Space' || e.code === 'KeyF') && window.gameInstance && window.gameInstance.state === 'PLAYING') {
-                window.gameInstance.shootGlock();
-                e.preventDefault();
-            }
+            // Space or F are disabled for shooting since weapon is removed
         });
         document.addEventListener('keyup', (e) => {
             if (!e.key) return;
@@ -71,13 +67,11 @@ export class Player {
             }
         });
 
-        // Click to shoot gun if pointer is locked
+        // Click to lock pointer
         document.addEventListener('mousedown', (e) => {
             if (window.gameInstance && window.gameInstance.state === 'PLAYING') {
                 if (!this.isPointerLocked) {
                     this.lockPointer();
-                } else if (e.button === 0) { // Left click
-                    window.gameInstance.shootGlock();
                 }
             }
         });

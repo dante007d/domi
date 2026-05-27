@@ -196,7 +196,7 @@ export class Game {
         this.renderer.buildLevel(this.maze, Levels[0]);
         this.player = new Player(this.renderer.camera, this.maze);
         this.chests = [];
-        this.monster = null;
+        this.monsters = [];
         window.gameInstance = this;
         
         // Multiplayer Socket disabled for Single Player Mode
@@ -267,8 +267,8 @@ export class Game {
         document.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
             if (key === 'b') {
-                this.maxUnlockedLevel = 25;
-                localStorage.setItem('domi_unlocked_level', '25');
+                this.maxUnlockedLevel = 20;
+                localStorage.setItem('domi_unlocked_level', '20');
                 this.updateLevelSelectorUI();
                 
                 // Show a brief unlock notification on screen
@@ -411,9 +411,9 @@ export class Game {
                 console.warn(e);
             }
         }
-        if (this.monster) {
-            this.monster.destroy();
-            this.monster = null;
+        if (this.monsters) {
+            this.monsters.forEach(m => m.destroy());
+            this.monsters = [];
         }
         AudioSystem.stopAmbient();
         document.getElementById('hud').classList.add('hidden');
@@ -434,8 +434,8 @@ export class Game {
             window.parent.Game.updateUI();
         }
         
-        // Handle Blockly Levels (6-10)
-        if (this.levelIndex >= 5) {
+        // Handle SPECTRUM Levels (11+)
+        if (this.levelIndex >= 10) {
             if (window.fetchLevel) {
                 window.fetchLevel(this.levelIndex + 1);
             } else {
@@ -499,9 +499,31 @@ export class Game {
             this.chests.push(new Chest(this.renderer.scene, this.maze, candidatePositions[1], true));
             this.chests.push(new Chest(this.renderer.scene, this.maze, candidatePositions[2], true));
 
-            // Spawn Monster
-            if (this.monster) this.monster.destroy();
-            this.monster = new Monster(this.renderer.scene, this.maze, this.player);
+            // Spawn Monsters (Scaling count with level, safe positioning)
+            if (this.monsters) {
+                this.monsters.forEach(m => m.destroy());
+            }
+            this.monsters = [];
+            
+            let numMonsters = Math.min(8, 2 + Math.floor((config.id - 1) / 2));
+            if (config.id >= 6 && config.id <= 10) {
+                numMonsters = 0; // No monsters in levels 6-10
+            }
+            const monsterPositions = [];
+            while (monsterPositions.length < numMonsters) {
+                const mx = Math.floor(Math.random() * this.maze.size);
+                const mz = Math.floor(Math.random() * this.maze.size);
+                const distToPlayer = Math.abs(mx - 1) + Math.abs(mz - 1);
+                if (this.maze.grid[mz][mx] === 0 && distToPlayer > 5) {
+                    if (!monsterPositions.some(p => p.x === mx && p.z === mz)) {
+                        monsterPositions.push({ x: mx, z: mz });
+                    }
+                }
+            }
+
+            monsterPositions.forEach(pos => {
+                this.monsters.push(new Monster(this.renderer.scene, this.maze, this.player, pos.x + 0.5, pos.z + 0.5));
+            });
             
             this.hud.setLevel(config.id);
             
@@ -566,16 +588,19 @@ export class Game {
         AudioSystem.playFanfare();
         
         this.levelIndex++;
+        if (window.recordLevelSolved) {
+            window.recordLevelSolved(this.levelIndex);
+        }
         if (this.levelIndex + 1 > this.maxUnlockedLevel) {
-            this.maxUnlockedLevel = Math.min(25, this.levelIndex + 1);
+            this.maxUnlockedLevel = Math.min(20, this.levelIndex + 1);
             localStorage.setItem('domi_unlocked_level', this.maxUnlockedLevel.toString());
             this.updateLevelSelectorUI();
         }
-        if (this.levelIndex >= 5) {
+        if (this.levelIndex >= 10) {
             this.state = 'WIN';
             document.getElementById('hud').classList.add('hidden');
             document.getElementById('win-screen').classList.remove('hidden');
-            document.getElementById('final-score').innerText = `Maze Conquered! Preparing for Logic Phase...`;
+            document.getElementById('final-score').innerText = `Maze Conquered! Preparing for Phase 2...`;
             
             // Instead of hard redirect, we now notify the parent game controller
             if (window.onPhaseComplete) {
@@ -583,9 +608,9 @@ export class Game {
             } else {
                 setTimeout(() => {
                     if (window.fetchLevel) {
-                        window.fetchLevel(6);
+                        window.fetchLevel(11);
                     } else {
-                        window.location.href = '../index.html?level=6';
+                        window.location.href = '../index.html?level=11';
                     }
                 }, 3000);
             }
@@ -595,71 +620,7 @@ export class Game {
     }
 
     shootGlock() {
-        const now = performance.now();
-        this.lastShootTime = this.lastShootTime || 0;
-        if (now - this.lastShootTime < 400) return; // Cooldown
-        this.lastShootTime = now;
-
-        AudioSystem.playPew();
-
-        // Muzzle flash
-        const flash = document.getElementById('muzzle-flash');
-        if (flash) {
-            flash.style.display = 'block';
-            setTimeout(() => flash.style.display = 'none', 80);
-        }
-
-        // Recoil
-        const hand = document.getElementById('player-hand');
-        if (hand) {
-            hand.classList.add('recoil');
-            setTimeout(() => hand.classList.remove('recoil'), 150);
-        }
-
-        // Check Hit on Monster
-        if (this.monster && this.monster.isActive && !this.monster.isDead) {
-            const toMonster = this.monster.position.clone().sub(this.player.camera.position);
-            const dist = toMonster.length();
-            toMonster.normalize();
-            
-            const lookDir = new THREE.Vector3();
-            this.player.camera.getWorldDirection(lookDir);
-            const dot = lookDir.dot(toMonster);
-
-            if (dot > 0.97 && dist < 15) {
-                // Raycast check: verify no walls block the bullet path to the monster
-                let hitWall = false;
-                const step = 0.2;
-                for (let d = 0.2; d < dist; d += step) {
-                    const checkPtX = this.player.camera.position.x + toMonster.x * d;
-                    const checkPtZ = this.player.camera.position.z + toMonster.z * d;
-                    if (this.maze.getCell(checkPtX, checkPtZ) === 1) {
-                        hitWall = true;
-                        break;
-                    }
-                }
-
-                if (!hitWall) {
-                    // Kill monster
-                    this.monster.die();
-
-                    // Show notification
-                    const notif = document.createElement('div');
-                    notif.innerText = "MONSTER ELIMINATED! (8S RESPAWN)";
-                    notif.style.position = 'absolute';
-                    notif.style.top = '25%';
-                    notif.style.left = '50%';
-                    notif.style.transform = 'translate(-50%, -50%)';
-                    notif.style.fontFamily = "'Press Start 2P', cursive";
-                    notif.style.fontSize = '1.2rem';
-                    notif.style.color = '#33ff33';
-                    notif.style.textShadow = '2px 2px #000, 0 0 10px #33ff33';
-                    notif.style.zIndex = 10000;
-                    document.body.appendChild(notif);
-                    setTimeout(() => notif.remove(), 2500);
-                }
-            }
-        }
+        // Disabled: player has no gun, only hands to run away from monsters.
     }
 
     onGameOver() {
@@ -725,6 +686,102 @@ export class Game {
         }, 5000);
     }
 
+    triggerMonsterAttack(monster) {
+        AudioSystem.playJumpScare();
+        
+        // Show jumpscare overlay for 1.5 seconds
+        const jumpscareOverlay = document.getElementById('jumpscare-overlay');
+        if (jumpscareOverlay) {
+            jumpscareOverlay.classList.remove('hidden');
+            jumpscareOverlay.style.display = 'flex';
+            
+            let flashCount = 0;
+            const flashInt = setInterval(() => {
+                jumpscareOverlay.style.filter = flashCount % 2 === 0 ? 'invert(1)' : 'none';
+                flashCount++;
+            }, 100);
+            
+            setTimeout(() => {
+                clearInterval(flashInt);
+                jumpscareOverlay.style.filter = 'none';
+                jumpscareOverlay.style.display = 'none';
+                jumpscareOverlay.classList.add('hidden');
+                
+                // Show Rage Message Overlay and freeze player
+                this.showRageMessageAndDeductLife();
+            }, 1500);
+        } else {
+            this.showRageMessageAndDeductLife();
+        }
+    }
+
+    showRageMessageAndDeductLife() {
+        // Respawn player
+        this.player.respawn();
+
+        // Save state and freeze controls
+        this.state = 'TRAP';
+        
+        // Screen invert punchy effect
+        const canvas = document.getElementById('game-canvas');
+        if (canvas) canvas.style.filter = 'invert(1)';
+        setTimeout(() => {
+            if (canvas) canvas.style.filter = 'none';
+        }, 500);
+
+        // Fetch random savage insult and show overlay
+        const insult = RAGE_INSULTS[Math.floor(Math.random() * RAGE_INSULTS.length)];
+        const overlay = document.getElementById('rage-message-overlay');
+        const textElem = document.getElementById('rage-message-text');
+        
+        if (textElem && overlay) {
+            textElem.innerText = "MONSTER CAUGHT YOU!\n\n" + insult;
+            overlay.style.display = 'flex';
+            overlay.classList.remove('hidden');
+        }
+
+        // Release pointer lock
+        try {
+            document.exitPointerLock();
+        } catch (e) {}
+
+        // Deduct life
+        this.quiz.lives--;
+        if (window.recordFailure) {
+            window.recordFailure();
+        }
+        const skulls = document.querySelectorAll('.skull');
+        if (skulls[this.quiz.lives]) {
+            skulls[this.quiz.lives].style.opacity = '0.2';
+        }
+
+        // Freeze for 5 seconds
+        setTimeout(() => {
+            if (overlay) {
+                overlay.style.display = 'none';
+                overlay.classList.add('hidden');
+            }
+            
+            if (this.quiz.lives <= 0) {
+                this.onGameOver();
+            } else {
+                this.state = 'PLAYING';
+                const canvasElem = document.getElementById('game-canvas');
+                if (canvasElem) {
+                    try {
+                        canvasElem.requestPointerLock();
+                        canvasElem.focus();
+                    } catch (err) {}
+                }
+                
+                // Reset positions of all monsters
+                if (this.monsters) {
+                    this.monsters.forEach(m => m.resetPosition());
+                }
+            }
+        }, 5000);
+    }
+
     reportFailure() {
         if (this.socket) {
             this.socket.emit('report_failure', { teamId: this.teamId });
@@ -737,8 +794,8 @@ export class Game {
 
         if (this.state === 'PLAYING') {
             this.player.update(dt);
-            if (this.monster) {
-                this.monster.update(dt);
+            if (this.monsters) {
+                this.monsters.forEach(m => m.update(dt));
             }
             
             let anyNear = false;
@@ -749,8 +806,8 @@ export class Game {
             
             this.hud.showInteract(anyNear);
             
-            // Minimap shows all chests and monster
-            this.hud.drawMinimap(this.maze, this.player.camera.position, this.chests, this.monster);
+            // Minimap shows all chests and monsters
+            this.hud.drawMinimap(this.maze, this.player.camera.position, this.chests, this.monsters);
         }
 
         // Always render if systems are initialized

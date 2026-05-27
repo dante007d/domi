@@ -111,6 +111,9 @@ export class QuizManager {
 
     loseLife() {
         this.lives--;
+        if (window.recordFailure) {
+            window.recordFailure();
+        }
         const skulls = document.querySelectorAll('.skull');
         if (skulls[this.lives]) {
             skulls[this.lives].style.opacity = '0.2';

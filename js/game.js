@@ -60,8 +60,8 @@ function switchToPhase(phase) { // 'MAZE' or 'BLOCKLY' or 'SPECTRUM'
 // Phase Completion Handler
 window.onPhaseComplete = () => {
     setTimeout(() => {
-        switchToPhase('BLOCKLY');
-        fetchLevel(6);
+        switchToPhase('SPECTRUM');
+        fetchLevel(11);
     }, 2000);
 };
 
@@ -93,6 +93,10 @@ window.exitSpectrumPhase = () => {
 async function fetchLevel(levelNumber) {
     window.fetchLevel = fetchLevel;
 
+    if (window.recordLevelSolved && levelNumber > 1) {
+        window.recordLevelSolved(levelNumber - 1);
+    }
+
     if (levelNumber > 10) {
         switchToPhase('SPECTRUM');
         const iframe = document.getElementById('spectrum-iframe');
@@ -106,7 +110,7 @@ async function fetchLevel(levelNumber) {
         window.parent.Game.state.level = levelNumber;
         window.parent.Game.updateUI();
     }
-    if (levelNumber < 6) {
+    if (levelNumber < 11) {
         switchToPhase('MAZE');
         if (mazeGameInstance) mazeGameInstance.startLevel(levelNumber - 1);
         return;
@@ -186,6 +190,9 @@ window.movePlayerForward = async () => {
                 const activeTeamId = (window.game && window.game.teamId) || localTeamId || 'unknown';
                 socket.emit('report_failure', { teamId: activeTeamId });
             }
+        }
+        if (window.recordFailure) {
+            window.recordFailure();
         }
         throw new Error('Crashed into a wall!');
     }
@@ -330,7 +337,115 @@ runBtn?.addEventListener('click', async () => {
 });
 
 window.addEventListener('load', () => {
-    // Add Blockly Back button listener
+    // Check for name in local storage
+    const stats = window.getLocalStats ? window.getLocalStats() : null;
+    const namePrompt = document.getElementById('name-prompt-overlay');
+    const mainMenu = document.getElementById('main-menu');
+    const nameInput = document.getElementById('player-name-input');
+    const playerDisplay = document.getElementById('menu-player-display');
+
+    if (stats && stats.playerName && stats.playerName !== 'PLAYER') {
+        if (namePrompt) namePrompt.classList.add('hidden');
+        if (mainMenu) mainMenu.classList.remove('hidden');
+        if (playerDisplay) playerDisplay.innerText = "PLAYER: " + stats.playerName;
+    } else {
+        if (namePrompt) namePrompt.classList.remove('hidden');
+        if (mainMenu) mainMenu.classList.add('hidden');
+    }
+
+    // Name Submit handler
+    document.getElementById('btn-submit-name')?.addEventListener('click', () => {
+        const name = nameInput ? nameInput.value.trim().toUpperCase() : "";
+        const cleanName = name.replace(/[^A-Z0-9 ]/g, "").slice(0, 15);
+        if (!cleanName) {
+            alert("PLEASE ENTER A VALID ALPHANUMERIC NAME (MAX 15 CHARACTERS)!");
+            return;
+        }
+
+        const newStats = {
+            playerName: cleanName,
+            levelsSolved: 0,
+            elapsedTime: 0,
+            totalFailures: 0
+        };
+        if (window.saveLocalStats) window.saveLocalStats(newStats);
+        if (window.Leaderboard) window.Leaderboard.submitScore(newStats);
+
+        if (playerDisplay) playerDisplay.innerText = "PLAYER: " + cleanName;
+        if (namePrompt) namePrompt.classList.add('hidden');
+        if (mainMenu) mainMenu.classList.remove('hidden');
+    });
+
+    // Change Name handler
+    document.getElementById('btn-change-name')?.addEventListener('click', () => {
+        if (namePrompt) namePrompt.classList.remove('hidden');
+        if (mainMenu) mainMenu.classList.add('hidden');
+        if (nameInput) nameInput.focus();
+    });
+
+    // Reset Run handler
+    document.getElementById('btn-reset-run')?.addEventListener('click', () => {
+        const stats = window.getLocalStats ? window.getLocalStats() : null;
+        if (stats) {
+            if (confirm("ARE YOU SURE YOU WANT TO RESET YOUR RUN? THIS WILL WIPE PROGRESS FOR YOUR CURRENT NAME.")) {
+                stats.levelsSolved = 0;
+                stats.elapsedTime = 0;
+                stats.totalFailures = 0;
+                if (window.saveLocalStats) window.saveLocalStats(stats);
+                if (window.Leaderboard) window.Leaderboard.submitScore(stats);
+                alert("RUN RESET COMPLETED!");
+            }
+        }
+    });
+
+    // Leaderboard button handler
+    document.getElementById('btn-leaderboard')?.addEventListener('click', () => {
+        const modal = document.getElementById('leaderboard-modal');
+        if (modal) modal.classList.remove('hidden');
+        
+        const container = document.getElementById('leaderboard-container');
+        if (container) container.innerHTML = '<div style="text-align: center; color: #ff0055;">LOADING SCORES...</div>';
+        
+        if (window.Leaderboard) {
+            window.Leaderboard.fetchScores().then(scores => {
+                if (!container) return;
+                if (!scores || scores.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; color: #777;">NO SCORES YET</div>';
+                    return;
+                }
+                let html = `<table style="width: 100%; border-collapse: collapse; text-align: left;">
+                    <tr style="border-bottom: 2px solid #ff0055; color: #ffaa00;">
+                        <th style="padding: 4px;">RANK</th>
+                        <th style="padding: 4px;">NAME</th>
+                        <th style="padding: 4px; text-align: center;">LEVELS</th>
+                        <th style="padding: 4px; text-align: center;">FAILURES</th>
+                        <th style="padding: 4px; text-align: right;">TIME</th>
+                    </tr>`;
+                scores.forEach((s, idx) => {
+                    const min = Math.floor(s.elapsedTime / 60);
+                    const sec = s.elapsedTime % 60;
+                    const timeStr = `${min}m ${sec}s`;
+                    html += `<tr style="border-bottom: 1px solid rgba(255,0,85,0.2);">
+                        <td style="padding: 4px; color: #ffaa00;">#${idx + 1}</td>
+                        <td style="padding: 4px; color: #fff;">${s.playerName}</td>
+                        <td style="padding: 4px; text-align: center; color: #33ff33;">${s.levelsSolved}/25</td>
+                        <td style="padding: 4px; text-align: center; color: #ff3333;">${s.totalFailures}</td>
+                        <td style="padding: 4px; text-align: right; color: #33ccff;">${timeStr}</td>
+                    </tr>`;
+                });
+                html += '</table>';
+                container.innerHTML = html;
+            });
+        }
+    });
+
+    // Leaderboard Back handler
+    document.getElementById('btn-back-leaderboard')?.addEventListener('click', () => {
+        const modal = document.getElementById('leaderboard-modal');
+        if (modal) modal.classList.add('hidden');
+    });
+
+    // Blockly Back button listener
     document.getElementById('btn-blockly-back')?.addEventListener('click', () => {
         switchToPhase('MAZE');
         if (mazeGameInstance) {
@@ -346,6 +461,26 @@ window.addEventListener('load', () => {
         switchToPhase('MAZE');
     }
 });
+
+// Global Active play timer tick (runs every 1 second)
+setInterval(() => {
+    const namePrompt = document.getElementById('name-prompt-overlay');
+    const mainMenu = document.getElementById('main-menu');
+    const waitingScreen = document.getElementById('waiting-screen');
+    const victoryModal = document.getElementById('victoryModal');
+    
+    const isNamePromptHidden = namePrompt ? namePrompt.classList.contains('hidden') : true;
+    const isMenuHidden = mainMenu ? mainMenu.classList.contains('hidden') : true;
+    const isWaitingHidden = waitingScreen ? waitingScreen.classList.contains('hidden') : true;
+    const isVictoryModalHidden = victoryModal ? !victoryModal.classList.contains('active') : true;
+    
+    if (isNamePromptHidden && isMenuHidden && isWaitingHidden && isVictoryModalHidden) {
+        // We are actively playing one of the levels
+        if (window.addPlayTime) {
+            window.addPlayTime(1);
+        }
+    }
+}, 1000);
 window.addEventListener('resize', updateBotVisuals);
 document.getElementById('nextLevelBtn')?.addEventListener('click', () => {
     document.getElementById('victoryModal')?.classList.remove('active');

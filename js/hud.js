@@ -68,21 +68,26 @@ export class HUD {
             });
         }
 
-        // Draw monster (Red skull)
-        if (monster && !monster.isDead) {
-            const mx = monster.position.x * this.mapScale;
-            const mz = monster.position.z * this.mapScale;
-            
-            this.ctx.fillStyle = '#ff0000';
-            this.ctx.beginPath();
-            this.ctx.arc(mx, mz, this.mapScale / 1.2, 0, Math.PI * 2);
-            this.ctx.fill();
-            
-            this.ctx.fillStyle = '#ffffff';
-            this.ctx.font = '10px Arial';
-            this.ctx.textAlign = 'center';
-            this.ctx.textBaseline = 'middle';
-            this.ctx.fillText('💀', mx, mz);
+        // Draw monsters (Red skulls)
+        if (monster) {
+            const monsterArray = Array.isArray(monster) ? monster : [monster];
+            monsterArray.forEach(m => {
+                if (m && !m.isDead) {
+                    const mx = m.position.x * this.mapScale;
+                    const mz = m.position.z * this.mapScale;
+                    
+                    this.ctx.fillStyle = '#ff0000';
+                    this.ctx.beginPath();
+                    this.ctx.arc(mx, mz, this.mapScale / 1.2, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.font = '10px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText('💀', mx, mz);
+                }
+            });
         }
 
         // Draw player

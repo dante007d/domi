@@ -13,23 +13,19 @@ export class GameRenderer {
         const h = window.innerHeight || 600;
         this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: false });
         this.renderer.setSize(w, h);
-        this.renderer.setPixelRatio(window.devicePixelRatio > 1 ? 0.75 : 1); // Optimized for pixelated look
+        this.renderer.setPixelRatio(0.5); // Chunky pixelated look!
         
         this.walls = [];
         this.floor = null;
         this.ceiling = null;
         this.levelConfig = null;
 
-        // Brighter Ambient Light
-        const ambientLight = new THREE.AmbientLight(0xffffff, 2.5);
+        // Ambient Light
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
         this.scene.add(ambientLight);
 
-        // Hemisphere Light for better depth
-        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1.5);
-        this.scene.add(hemiLight);
-
         // Player Light (Torch)
-        this.torchLight = new THREE.PointLight(0xffddaa, 3, 10);
+        this.torchLight = new THREE.PointLight(0xffddaa, 2, 7);
         this.scene.add(this.torchLight);
         this.torchTime = 0;
 
@@ -45,12 +41,12 @@ export class GameRenderer {
         if (this.floor) this.scene.remove(this.floor);
         if (this.ceiling) this.scene.remove(this.ceiling);
 
-        // Fog for DOOM atmosphere - Temporarily disabled for debugging
-        // this.scene.fog = new THREE.Fog(0x0a0a0a, 1, 8); 
+        // Fog for DOOM atmosphere
+        this.scene.fog = new THREE.Fog(0x0a0a0a, 1, 8); // Reduced to 8 for difficulty
         this.scene.background = new THREE.Color(0x0a0a0a);
 
         const wallTexture = Textures.getTexture(levelConfig.theme);
-        const wallMat = new THREE.MeshBasicMaterial({ map: wallTexture });
+        const wallMat = new THREE.MeshLambertMaterial({ map: wallTexture });
         const wallGeo = new THREE.BoxGeometry(1, 2, 1); // Height increased to 2
 
         for (let y = 0; y < maze.size; y++) {
@@ -65,20 +61,16 @@ export class GameRenderer {
         }
         console.log(`Renderer: Built ${this.walls.length} walls for theme ${levelConfig.theme}`);
 
-        // Floor (Path)
+        // Floor
         const floorGeo = new THREE.PlaneGeometry(maze.size, maze.size);
-        const floorTexture = Textures.getFloorTexture(levelConfig.theme);
-        floorTexture.repeat.set(maze.size, maze.size); // Tiling matching grid scale
-        const floorMat = new THREE.MeshBasicMaterial({ map: floorTexture });
+        const floorMat = new THREE.MeshLambertMaterial({ color: levelConfig.floorColor });
         this.floor = new THREE.Mesh(floorGeo, floorMat);
         this.floor.rotation.x = -Math.PI / 2;
         this.floor.position.set(maze.size / 2, -0.5, maze.size / 2); // Centered at size/2
         this.scene.add(this.floor);
 
         // Ceiling
-        const ceilTexture = Textures.getCeilingTexture(levelConfig.theme);
-        ceilTexture.repeat.set(maze.size, maze.size); // Tiling matching grid scale
-        const ceilMat = new THREE.MeshBasicMaterial({ map: ceilTexture });
+        const ceilMat = new THREE.MeshLambertMaterial({ color: 0x050505 });
         this.ceiling = new THREE.Mesh(floorGeo, ceilMat);
         this.ceiling.rotation.x = Math.PI / 2;
         this.ceiling.position.set(maze.size / 2, 1.5, maze.size / 2); // Centered at size/2

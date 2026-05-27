@@ -1,0 +1,1772 @@
+﻿
+>   <script>
+      // --- GAME ENGINE ---
+      const Game = {
+        state: {
+          level: 11,
+          zone: 1,
+          lives: 3,
+          time: 0,
+          checkpoints: { 1: 11, 2: 16, 3: 21, 4: 26 },
+          ouroborosLoops: 0,
+          isRunning: false,
+          isDevMode: false,
+          rageMessages: [
+              "Iâ€™ve seen disconnected players contribute more than you.",
+              "Youâ€™re not the weakest player here. Youâ€™re the reason the weak feel better about themselves.",
+              "You fight like every neuron in your brain filed for resignation.",
+              "Your gameplay is a crime scene and your teammates are the witnesses.",
+              "You donâ€™t make mistakes anymore. You manufacture disasters.",
+              "You move with the confidence of a god and the awareness of roadkill.",
+              "The enemy team isnâ€™t trying to kill you anymore. Theyâ€™re just seeing what else youâ€™ll do wrong.",
+              "You are single-handedly lowering the skill ceiling of the entire match.",
+              "You play like failure owes you money.",
+              "Your mechanics are so bad they look intentionally sabotaged.",
+              "You got dismantled so completely even the spectators lost respect.",
+              "You aim like your crosshair has a restraining order against enemies.",
+              "Every time you touch the keyboard, your team loses hope.",
+              "Youâ€™re not unpredictable because youâ€™re smart. Youâ€™re unpredictable because nothing you do makes 
+sense.",
+              "You enter fights already defeated.",
+              "The enemy doesnâ€™t outplay you. They wait for you to self-destruct.",
+              "You perform like a motivational quote written on a collapsing building.",
+              "Your existence in ranked is a public safety hazard.",
+              "Youâ€™re so consistently useless it almost becomes impressive.",
+              "You fight like your brain is running on trial software.",
+              "Youâ€™re not pressure-tested. Youâ€™re pressure-deleted.",
+              "The scoreboard isnâ€™t stats anymore. Itâ€™s evidence.",
+              "Youâ€™re the human equivalent of a failed quick-time event.",
+              "You got humiliated so badly the game should apologize for matchmaking.",
+              "Your gameplay radiates panic, confusion, and unemployment.",
+              "Youâ€™re not a clutch player. Youâ€™re a cautionary tale.",
+              "You make incompetence look genetically inherited.",
+              "Your enemies stopped respecting the fight and started speedrunning you.",
+              "You move like your keyboard inputs are legally binding mistakes.",
+              "Every round with you feels like a hostage situation.",
+              "You donâ€™t lose because of mechanics. You lose because every decision you make is catastrophically 
+stupid.",
+              "You have the awareness of expired yogurt.",
+              "Your strategy is just random panic disguised as movement.",
+              "Youâ€™re the reason teammates mute voice chat.",
+              "You fight like your thoughts arrive 30 seconds late.",
+              "You couldnâ€™t outplay a loading screen.",
+              "Your gameplay belongs in a museum of preventable disasters.",
+              "The enemy team isnâ€™t farming kills anymore. Theyâ€™re farming confidence.",
+              "Youâ€™re not dead weight. Dead weight at least stays still.",
+              "You bring the tactical value of a smoke detector without batteries.",
+              "Youâ€™re the first player Iâ€™ve seen get mentally defeated before the countdown ends.",
+              "You play like your mouse is controlled by intrusive thoughts.",
+              "Youâ€™re not improving. Youâ€™re just repeating failure with enthusiasm.",
+              "You aim with the determination of a blindfolded tourist.",
+              "Your performance makes bots look handcrafted.",
+              "You are the strongest argument against skill-based matchmaking.",
+              "You fight like a man trying to refund the game through gameplay.",
+              "Your team doesnâ€™t need enemies with you around.",
+              "You got outclassed so badly it looked educational.",
+              "Youâ€™re not part of the match. Youâ€™re the comic relief.",
+              "The only thing more fragile than your gameplay is your decision-making.",
+              "You are what happens when ego queues without skill.",
+              "You are living proof that matchmaking can fail catastrophically.",
+              "Calling you trash is disrespectful to garbage. Garbage gets recycled into something useful.",
+              "You play like your monitor is turned off and your ego is turned up.",
+              "Every second you stay alive is statistical luck.",
+              "Youâ€™re not feeding the enemy. Youâ€™re running a charity.",
+              "Your gameplay has the survival instinct of a moth in a furnace.",
+              "You fight like someone typing with oven mitts.",
+              "Your enemies arenâ€™t even impressed anymore. Theyâ€™re concerned.",
+              "You have the mechanical precision of a collapsing shopping cart.",
+              "Watching you play explains why natural selection takes time.",
+              "You bring absolutely nothing to the battlefield except extra deaths.",
+              "Your aim belongs in a missing persons report.",
+              "You move like your brain and hands are in a long-distance relationship.",
+              "Even your own teammates mentally disconnected from you.",
+              "Youâ€™re the kind of noob tutorials warn people about.",
+              "Your opponent isnâ€™t skilled. Youâ€™re just catastrophically incompetent.",
+              "You got destroyed so badly the replay should be classified as violence.",
+              "Every fight becomes easier the moment you join the enemy team accidentally.",
+              "You play like failure is genetically encoded.",
+              "Your confidence survives longer than your character ever does.",
+              "You make basic mistakes with professional consistency.",
+              "Even bots would hesitate before making decisions this stupid.",
+              "Youâ€™re not hardstuck because of teammates. You are the teammate.",
+              "Your gameplay looks like a parody made to insult bad players.",
+              "You die with such speed and consistency it feels automated.",
+              "You enter fights like a motivational speaker and leave like roadkill.",
+              "You couldnâ€™t clutch a single neuron together under pressure.",
+              "You aim at enemies like youâ€™re politely asking permission to hit them.",
+              "Your strategy begins with panic and ends with excuses.",
+              "You have the tactical awareness of a wet sock.",
+              "Your performance lowered the value of teamwork.",
+              "You got outplayed so hard your keyboard deserves a better owner.",
+              "You play like you owe the enemy team money.",
+              "Youâ€™re not learning from mistakes anymore. Youâ€™re preserving traditions.",
+              "The only thing carrying you is delusion.",
+              "You lose fights before they even begin because your decisions are terminally bad.",
+              "You make incompetence look effortless.",
+              "Your mechanics are so bad they loop back into comedy.",
+              "You fight like your thoughts are buffering.",
+              "Youâ€™re what happens when confidence outruns intelligence.",
+              "The enemy isnâ€™t farming kills anymore. Theyâ€™re farming self-esteem.",
+              "You bring the same energy as a broken controller at a tournament.",
+              "You got read so easily your opponent probably predicted your birth date too.",
+              "You are the final boss of poor decision-making.",
+              "Your gameplay belongs in a cautionary documentary.",
+              "You have the awareness of decorative furniture.",
+              "Youâ€™re not unlucky. Youâ€™re just bad repeatedly.",
+              "Your existence in this lobby is a competitive disadvantage.",
+              "You play with the intensity of a man trying to lose on purpose.",
+              "Even spectators are getting tilted watching this incompetence.",
+              "You got folded so fast the laws of physics took notes.",
+              "Your enemies stopped sweating and started experimenting.",
+              "Youâ€™re not a threat. Youâ€™re warm-up content.",
+              "The arena doesnâ€™t fear you. It farms you.",
+              "Iâ€™ve seen training dummies survive longer than you.",
+              "Youâ€™re not just bad â€” you actively reduce the intelligence of the entire lobby.",
+              "Your gameplay is what happens when confidence develops faster than skill.",
+              "You die so fast the respawn timer knows you personally.",
+              "Even your failures lack effort.",
+              "You play like your only goal is disappointing everyone equally.",
+              "The enemy team stopped calling you a threat five deaths ago.",
+              "You have the tactical awareness of a brick thrown through a window.",
+              "Every decision you make somehow becomes the worst possible one.",
+              "You move like panic is your default control scheme.",
+              "Youâ€™re not hard to beat. Youâ€™re hard to watch.",
+              "You got destroyed with such efficiency it looked scheduled.",
+              "The only thing sharp about your gameplay is the drop in team morale.",
+              "You enter every fight with the confidence of a champion and the competence of unplugged hardware.",
+              "You are the physical manifestation of â€˜skill issue.â€™",
+              "Your enemies arenâ€™t adapting to you. Theyâ€™re abusing you.",
+              "You fight like a motivational speech trapped inside a bad player.",
+              "Youâ€™ve mastered one mechanic: losing consistently.",
+              "Watching you think in real time is painful.",
+              "You got folded so hard even your excuses sounded defeated.",
+              "Your gameplay has the energy of expired batteries.",
+              "You make simple mistakes with elite precision.",
+              "Youâ€™re not a competitor. Youâ€™re environmental storytelling.",
+              "You play like the concept of improvement personally offended you.",
+              "The enemy team uses you to test risky strategies because they know you canâ€™t punish mistakes.",
+              "You have the reaction time of a voicemail.",
+              "You collapse under pressure that doesnâ€™t even exist.",
+              "You fight like your survival depends entirely on luck and pity.",
+              "Your gameplay belongs in a bug report.",
+              "You make losing look less like failure and more like destiny.",
+              "Youâ€™re not trash. Trash eventually gets taken out.",
+              "The only thing carrying you is matchmaking mercy.",
+              "Youâ€™re the reason tutorials include pictures.",
+              "Your teammates stopped expecting help and started expecting damage control.",
+              "You got dismantled so completely the scoreboard looks disrespectful.",
+              "You aim like your crosshair is afraid of enemies.",
+              "You bring chaos to your own side and confidence to the enemy.",
+              "Your gameplay is a live demonstration of unmanaged incompetence.",
+              "You move through the map like a lost tourist.",
+              "Even your lucky moments look accidental.",
+              "You donâ€™t lose because the enemy is good. You lose because you exist in the fight.",
+              "Youâ€™re not getting outplayed anymore. Youâ€™re getting studied.",
+              "You make bad decisions with the certainty of a genius.",
+              "The enemy team treats you like free downloadable content.",
+              "Youâ€™re the weakest thing on the battlefield, including the decorations.",
+              "You enter every match like a hero and leave like evidence.",
+              "Your survival instincts are purely decorative.",
+              "You got humiliated so hard even the game stopped trying to make it fair.",
+              "You play with maximum ego and minimum awareness.",
+              "Your mechanics look hand-crafted to fail under pressure.",
+              "You are what happens when failure gets a keyboard.",
+              "Every time you respawn, the enemy gets a confidence boost.",
+              "Youâ€™re not built for competition. Youâ€™re built for tutorials.",
+              "You fight like your brain clocked out before the match started.",
+              "The scoreboard tells a story, and your chapter is pure suffering."
+          ]
+        },
+  
+        zones: {
+          1: { name: "COMPILE OR DIE", class: "zone-1-theme" },
+          2: { name: "OUROBOROS", class: "zone-3-theme" },
+          3: { name: "THE FINAL GAUNTLET", class: "zone-4-theme" }
+        },
+  
+        init() {
+          const savedTeam = sessionStorage.getItem('blockly_session');
+          let parsedTeam = null;
+          if (savedTeam) {
+              try {
+                  parsedTeam = JSON.parse(savedTeam);
+              } catch (e) {
+                  console.error("Error parsing blockly_session:", e);
+              }
+          }
+          if (parsedTeam) {
+              this.teamId = parsedTeam.id;
+              this.teamName = parsedTeam.name;
+          } else {
+              this.teamId = 'TEAM-' + Math.random().toString(36).substr(2, 9);
+              this.teamName = "PLAYER";
+          }
+          this.socket = null;
+  
+          // Parse level parameter from URL if present
+          const urlParams = new URLSearchParams(window.location.search);
+          const levelParam = urlParams.get('level');
+          const startLevel = levelParam ? parseInt(levelParam) : 11;
+  
+          // Add back to menu listener
+          const btnBack = document.getElementById('btn-back-to-menu');
+          if (btnBack) {
+            btnBack.addEventListener('click', () => {
+              if (window.parent && window.parent.exitSpectrumPhase) {
+                window.parent.exitSpectrumPhase();
+              } else {
+                window.location.href = '../index.html';
+              }
+            });
+          }
+  
+          this.updateUI();
+          this.startTimer();
+          this.setupDevMode();
+          this.loadLevel(startLevel);
+        },
+  
+        setupDevMode() {
+          window.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'b') {
+              this.state.isDevMode = !this.state.isDevMode;
+              this.playTransition();
+              const sub = document.getElementById('transition-subtitle');
+              sub.innerText = this.state.isDevMode ? "DEV MODE ENABLED" : "DEV MODE DISABLED";
+              this.updateUI();
+              if (this.state.isDevMode) this.showStartPage();
+            }
+          });
+        },
+  
+        showStartPage() {
+          const content = document.getElementById('view-content');
+          content.innerHTML = `
+                      <div class="terminal-block" style="text-align:center; display:flex; flex-direction:column; 
+justify-content:center; height:100%;">
+                          <h1 class="glitch-text" style="font-size:60px; margin-bottom:10px;">DOMINO'S EFFECT</h1>
+                          <p style="color:var(--text-muted); margin-bottom:40px;">// SPECTRUM SECURE ACCESS 
+TERMINAL</p>
+                          
+                          <div style="display:flex; flex-direction:column; gap:15px; align-items:center;">
+                              <button onclick="Game.loadLevel(Game.state.level)" style="width:250px;">ENTER 
+SYSTEM</button>
+                              <button onclick="Game.showLevelSelect()" style="width:250px; 
+background:var(--text-muted);">LEVEL SELECT</button>
+                          </div>
+  
+                          ${this.state.isDevMode ? '<p style="margin-top:20px; color:var(--accent-cyan);">[!] DEV 
+MODE: ALL BYPASSES ACTIVE</p>' : ''}
+                      </div>
+                  `;
+        },
+  
+        showLevelSelect() {
+          const content = document.getElementById('view-content');
+          let html = `
+                      <div class="terminal-block" style="overflow-y:auto; max-height:100%;">
+                          <p>> SELECT ACCESS POINT:</p>
+                          <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:10px; margin-top:20px;">
+                  `;
+  
+          const maxUnlocked = parseInt(localStorage.getItem('domi_unlocked_level') || '11');
+  
+          for (let i = 11; i <= 25; i++) {
+            const isLocked = !this.state.isDevMode && i > Math.max(this.state.level, maxUnlocked);
+            html += `
+                          <button onclick="${isLocked ? '' : `Game.loadLevel(${i})`}" 
+                                  style="background:${isLocked ? '#222' : 'var(--accent-cyan)'}; 
+                                         color:${isLocked ? '#444' : 'black'};
+                                         cursor:${isLocked ? 'not-allowed' : 'pointer'};">
+                              ${String(i).padStart(2, '0')}
+                          </button>
+                      `;
+          }
+  
+          html += `
+                          </div>
+                          <button onclick="Game.showStartPage()" style="margin-top:30px; width:100%; 
+background:var(--text-muted);">BACK</button>
+                      </div>
+                  `;
+          content.innerHTML = html;
+        },
+  
+        updateUI() {
+          document.getElementById('level-display').innerText = `LEVEL ${String(this.state.level).padStart(2, '0')} / 
+25`;
+          document.getElementById('zone-display').innerText = this.zones[this.state.zone].name;
+        },
+  
+        startTimer() {
+          setInterval(() => {
+            this.state.time++;
+            const h = Math.floor(this.state.time / 3600);
+            const m = Math.floor((this.state.time % 3600) / 60);
+            const s = this.state.time % 60;
+            document.getElementById('global-timer').innerText =
+              `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+          }, 1000);
+        },
+  
+        loadLevel(lvl) {
+          this.state.level = lvl;
+          this.updateUI();
+          
+          if (this.socket) {
+              // Slight delay to ensure the backend has finished processing 'join_game'
+              setTimeout(() => {
+                  this.socket.emit('update_progress', { teamId: this.teamId, level: lvl });
+              }, 500);
+          }
+  
+          // Determine Zone
+          const prevZone = this.state.zone;
+          if (lvl <= 15) this.state.zone = 1;
+          else if (lvl <= 20) this.state.zone = 2;
+          else this.state.zone = 3;
+  
+          if (this.state.zone !== prevZone) {
+            this.playTransition();
+          }
+  
+          this.renderLevel();
+        },
+  
+        playTransition() {
+          const overlay = document.getElementById('transition-overlay');
+          const title = document.getElementById('transition-title');
+          title.innerText = this.zones[this.state.zone].name;
+          overlay.style.display = 'flex';
+          overlay.classList.add('ui-shake');
+          setTimeout(() => {
+            overlay.style.display = 'none';
+            overlay.classList.remove('ui-shake');
+          }, 2000);
+        },
+  
+        renderLevel() {
+          const content = document.getElementById('view-content');
+          content.innerHTML = ''; 
+  
+          // Check for saved custom layout for platformer levels (21-25)
+          if (this.state.level >= 21) {
+              const saved = localStorage.getItem(`saved_level_${this.state.level}`);
+              if (saved) {
+                  console.log(`[SYSTEM] LOADING PERSISTED LAYOUT FOR LEVEL ${this.state.level}`);
+                  try {
+                      Platformer.init(content, JSON.parse(saved));
+                      return;
+                  } catch (e) {
+                      console.error("Error parsing saved level layout:", e);
+                  }
+              }
+          }
+  
+          const levelData = Levels[this.state.level];
+          if (!levelData) return;
+  
+          levelData.render(content);
+        },
+  
+        fail() {
+          // Punishment logic
+          let resetLvl;
+          if (this.state.zone === 3) {
+            resetLvl = 21; // Ouroboros loop
+            this.state.ouroborosLoops++;
+          } else {
+            resetLvl = this.state.checkpoints[this.state.zone];
+          }
+  
+          const viewport = document.getElementById('zone-viewport');
+          viewport.classList.add('ui-shake');
+          setTimeout(() => viewport.classList.remove('ui-shake'), 300);
+          
+          this.showRageBait();
+          setTimeout(() => {
+              this.loadLevel(resetLvl);
+          }, 4000);
+        },
+  
+        showRageBait() {
+          if (this.socket) {
+              this.socket.emit('report_failure', { teamId: this.teamId });
+          }
+          if (window.parent && window.parent.recordFailure) {
+              window.parent.recordFailure();
+          }
+          const overlay = document.getElementById('rage-bait-overlay');
+          const msg = document.getElementById('rage-message');
+          msg.innerText = this.state.rageMessages[Math.floor(Math.random() * this.state.rageMessages.length)];
+          overlay.style.display = 'flex';
+          setTimeout(() => {
+              overlay.style.display = 'none';
+          }, 4000);
+        },
+  
+        next() {
+          if (window.parent && window.parent.recordLevelSolved) {
+              window.parent.recordLevelSolved(this.state.level);
+          }
+          if (this.state.level < 25) {
+            this.loadLevel(this.state.level + 1);
+          } else {
+            this.showVictoryScreen();
+          }
+        },
+  
+        showVictoryScreen() {
+          if (this.socket) {
+              this.socket.emit('update_progress', { teamId: this.teamId, level: 26 });
+          }
+          const content = document.getElementById('view-content');
+          content.innerHTML = `
+                      <div class="terminal-block" style="text-align:center; padding-top:100px;">
+                          <h1 class="glitch-text" style="font-size:60px;">SYSTEM BREACH SUCCESSFUL</h1>
+                          <p style="margin-top:20px; color:var(--accent-cyan);">ALL 25 DOMINOES HAVE FALLEN.</p>
+                          <button onclick="location.reload()" style="margin-top:40px;">REBOOT SYSTEM</button>
+                      </div>
+                  `;
+        }
+      };
+  
+      // --- PLATFORMER ENGINE (RAGE BAIT) ---
+      const Platformer = {
+        canvas: null, ctx: null,
+        player: {
+          x: 50, y: 50, vx: 0, vy: 0, w: 30, h: 30, color: '#00FFD1',
+          canDoubleJump: true,
+          isDashing: false,
+          dashTime: 0,
+          dashDir: 1,
+          lastJumpPressed: false,
+          lastDashPressed: false,
+          trail: []
+        },
+        keys: {},
+        platforms: [],
+        spikes: [],
+        saws: [],
+        lasers: [],
+        goal: { x: 0, y: 0, w: 30, h: 30 },
+        gravity: 0.4,
+        jump: -7.5,
+        accel: 0.3,
+        friction: 0.8,
+        maxSpeed: 3.5,
+        dashSpeed: 10,
+        camX: 0,
+        shake: 0,
+        particles: [],
+        frame: 0,
+        showHitboxes: false,
+        spawnPos: { x: 50, y: 300 },
+        timeScale: 1.0,
+        orbs: [],
+        orbsCollected: 0,
+        isRewinding: false,
+  
+        // Editor State
+        editor: {
+          active: false,
+          tool: 'platform', // platform, saw, laser
+          startPos: null,
+          currentPos: null,
+          snap: 10
+        },
+  
+        init(container, levelData) {
+          if (levelData && levelData.physics) {
+            this.gravity = levelData.physics.gravity !== undefined ? levelData.physics.gravity : 0.4;
+            this.jump = levelData.physics.jump !== undefined ? levelData.physics.jump : -7.5;
+            this.maxSpeed = levelData.physics.maxSpeed !== undefined ? levelData.physics.maxSpeed : 3.5;
+            this.friction = levelData.physics.friction !== undefined ? levelData.physics.friction : 0.8;
+            this.timeScale = levelData.physics.timeScale !== undefined ? levelData.physics.timeScale : 1.0;
+          } else {
+            this.gravity = 0.4;
+            this.jump = -7.5;
+            this.maxSpeed = 3.5;
+            this.friction = 0.8;
+            this.timeScale = 1.0;
+          }
+          const rect = container.getBoundingClientRect();
+          container.innerHTML = `
+                      <div style="position:relative; width:100%; height:100%;">
+                          <canvas id="plat-canvas" width="${rect.width}" height="${rect.height}" 
+style="background:#000;"></canvas>
+                          
+                          <!-- NEW DEV PANEL -->
+                          <div id="editor-ui" style="position:absolute; top:10px; left:10px; display:none; 
+background:rgba(5, 5, 15, 0.95); border:1px solid var(--accent-cyan); padding:15px; color:white; font-size:11px; 
+pointer-events:auto; width:220px; box-shadow: 0 0 20px rgba(0,0,0,0.8); backdrop-filter: blur(5px); cursor:default;">
+                              <div id="editor-header" style="font-weight:bold; color:var(--accent-cyan); 
+margin-bottom:10px; border-bottom:1px solid #333; padding-bottom:5px; cursor:grab; display:flex; 
+justify-content:space-between; align-items:center;">
+                                  <span>DEV CONTROL PANEL</span>
+                                  <span style="font-size:8px; opacity:0.5;">[DRAG ME]</span>
+                              </div>
+                              
+                              <div style="margin-bottom:15px;">
+                                  <div style="color:var(--text-muted); margin-bottom:5px;">[TOOLS] T to Cycle</div>
+                                  <div style="display:flex; flex-wrap:wrap; gap:5px;">
+                                      <span id="tool-name" style="background:var(--accent-cyan); color:black; 
+padding:2px 6px; font-weight:bold;">PLATFORM</span>
+                                  </div>
+                              </div>
+  
+                              <div style="margin-bottom:15px;">
+                                  <div style="color:var(--text-muted); margin-bottom:5px;">[PHYSICS]</div>
+                                  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                                      <label>Grav: <input type="number" step="0.05" value="${this.gravity}" 
+oninput="Platformer.gravity = parseFloat(this.value)" style="width:50px; background:#000; border:1px solid #333; 
+color:white;"></label>
+                                      <label>Jump: <input type="number" step="0.5" value="${this.jump}" 
+oninput="Platformer.jump = parseFloat(this.value)" style="width:50px; background:#000; border:1px solid #333; 
+color:white;"></label>
+                                      <label>Speed: <input type="number" step="0.5" value="${this.maxSpeed}" 
+oninput="Platformer.maxSpeed = parseFloat(this.value)" style="width:50px; background:#000; border:1px solid #333; 
+color:white;"></label>
+                                      <label>Fric: <input type="number" step="0.05" value="${this.friction}" 
+oninput="Platformer.friction = parseFloat(this.value)" style="width:50px; background:#000; border:1px solid #333; 
+color:white;"></label>
+                                      <label>Time: <input type="number" step="0.1" value="${this.timeScale}" 
+oninput="Platformer.timeScale = parseFloat(this.value)" style="width:50px; background:#000; border:1px solid #333; 
+color:white;"></label>
+                                  </div>
+                              </div>
+  
+                              <div style="margin-bottom:15px;">
+                                  <div style="color:var(--text-muted); margin-bottom:5px;">[ACTIONS]</div>
+                                  <button onclick="Platformer.clearLevel()" style="width:100%; font-size:10px; 
+background:#400; color:white;">CLEAR ALL ENTITIES</button>
+                              </div>
+  
+                              <div style="margin-bottom:15px;">
+                                  <div style="color:var(--text-muted); margin-bottom:5px;">[VISUALS]</div>
+                                  <label style="display:block;"><input type="checkbox" 
+onchange="Platformer.showHitboxes = this.checked"> Show Hitboxes</label>
+                              </div>
+  
+                              <div style="border-top:1px solid #333; padding-top:10px; font-size:10px; 
+color:var(--text-muted);">
+                                  [LMB] Create | [RMB] Delete<br>
+                                  [S] Save | [E] Close Dev
+                              </div>
+                          </div>
+                      </div>
+                  `;
+          this.canvas = document.getElementById('plat-canvas');
+          this.ctx = this.canvas.getContext('2d');
+          this.platforms = levelData.platforms || [];
+          this.spikes = levelData.spikes || [];
+          this.saws = levelData.saws || [];
+          this.lasers = levelData.lasers || [];
+          this.orbs = levelData.orbs || [];
+          this.orbsCollected = 0;
+          this.goal = levelData.goal;
+          this.player.x = this.spawnPos.x; this.player.y = this.spawnPos.y;
+          this.player.vx = 0; this.player.vy = 0;
+          this.player.canDoubleJump = true;
+          this.player.isDashing = false;
+          this.player.trail = [];
+          this.camX = 0;
+          this.shake = 0;
+          this.particles = [];
+          this.frame = 0;
+  
+          this.setupInputs();
+  
+          if (this.loopId) cancelAnimationFrame(this.loopId);
+          this.loop();
+          this.setupDraggable();
+        },
+  
+        setupDraggable() {
+          const el = document.getElementById('editor-ui');
+          const header = document.getElementById('editor-header');
+          let isDragging = false;
+          let offset = { x: 0, y: 0 };
+  
+          header.onmousedown = (e) => {
+              isDragging = true;
+              offset.x = e.clientX - el.offsetLeft;
+              offset.y = e.clientY - el.offsetTop;
+              header.style.cursor = 'grabbing';
+          };
+  
+          window.onmousemove = (e) => {
+              if (!isDragging) return;
+              el.style.left = (e.clientX - offset.x) + 'px';
+              el.style.top = (e.clientY - offset.y) + 'px';
+          };
+  
+          window.onmouseup = () => {
+              isDragging = false;
+              header.style.cursor = 'grab';
+          };
+        },
+  
+        setupInputs() {
+          window.onkeydown = (e) => {
+            this.keys[e.code] = true;
+            if (e.key.toLowerCase() === 'e') {
+              this.editor.active = !this.editor.active;
+              document.getElementById('editor-ui').style.display = this.editor.active ? 'block' : 'none';
+              
+              // Automatically persist custom layout and physics properties on closing editor (pressing E)
+              const levelId = Game.state.level;
+              const layout = {
+                platforms: this.platforms,
+                saws: this.saws,
+                lasers: this.lasers,
+                spikes: this.spikes,
+                orbs: this.orbs,
+                goal: this.goal,
+                spawnPos: this.spawnPos,
+                physics: {
+                  gravity: this.gravity,
+                  jump: this.jump,
+                  maxSpeed: this.maxSpeed,
+                  friction: this.friction,
+                  timeScale: this.timeScale
+                }
+              };
+              localStorage.setItem(`saved_level_${levelId}`, JSON.stringify(layout));
+              console.log(`--- PERSISTED PHYSICS & LAYOUT LEVEL ${levelId} ON 'E' TOGGLE ---`);
+            }
+            if (this.editor.active) {
+              if (e.key.toLowerCase() === 't') {
+                const tools = ['platform', 'saw', 'laser', 'spike', 'spawn', 'orb', 'goal'];
+                const idx = (tools.indexOf(this.editor.tool) + 1) % tools.length;
+                this.editor.tool = tools[idx];
+                document.getElementById('tool-name').innerText = this.editor.tool.toUpperCase();
+              }
+              if (e.key.toLowerCase() === 's') {
+                const levelId = Game.state.level;
+                const layout = {
+                  platforms: this.platforms,
+                  saws: this.saws,
+                  lasers: this.lasers,
+                  spikes: this.spikes,
+                  orbs: this.orbs,
+                  goal: this.goal,
+                  spawnPos: this.spawnPos,
+                  physics: {
+                    gravity: this.gravity,
+                    jump: this.jump,
+                    maxSpeed: this.maxSpeed,
+                    friction: this.friction,
+                    timeScale: this.timeScale
+                  }
+                };
+                localStorage.setItem(`saved_level_${levelId}`, JSON.stringify(layout));
+                console.log(`--- PERSISTED LEVEL ${levelId} TO STORAGE ---`);
+                alert(`LEVEL ${levelId} SAVED LOCALLY!`);
+              }
+            }
+          };
+          window.onkeyup = (e) => this.keys[e.code] = false;
+  
+          // Specialized handler for editor panel input fields to bypass scientific "e" key trapping and allow 
+blur-on-Enter
+          const editorInputs = document.querySelectorAll('#editor-ui input');
+          editorInputs.forEach(input => {
+            input.addEventListener('keydown', (e) => {
+              if (e.key === 'Enter') {
+                input.blur();
+                e.preventDefault();
+                e.stopPropagation();
+              }
+              if (e.key.toLowerCase() === 'e') {
+                input.blur();
+                this.editor.active = false;
+                document.getElementById('editor-ui').style.display = 'none';
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Automatically persist layout and custom physics
+                const levelId = Game.state.level;
+                const layout = {
+                  platforms: this.platforms,
+                  saws: this.saws,
+                  lasers: this.lasers,
+                  spikes: this.spikes,
+                  orbs: this.orbs,
+                  goal: this.goal,
+                  spawnPos: this.spawnPos,
+                  physics: {
+                    gravity: this.gravity,
+                    jump: this.jump,
+                    maxSpeed: this.maxSpeed,
+                    friction: this.friction,
+                    timeScale: this.timeScale
+                  }
+                };
+                localStorage.setItem(`saved_level_${levelId}`, JSON.stringify(layout));
+                console.log(`--- PERSISTED PHYSICS & LAYOUT LEVEL ${levelId} ON 'E' TOGGLE FROM INPUT ---`);
+              }
+            });
+          });
+  
+          this.canvas.onmousedown = (e) => {
+            if (!this.editor.active) {
+              const rect = this.canvas.getBoundingClientRect();
+              const clickX = e.clientX - rect.left;
+              const clickY = e.clientY - rect.top;
+              
+              if (e.button === 0) { // Left Click
+                // If click is in upper part of canvas, jump!
+                if (clickY < rect.height * 0.35) {
+                  this.keys['Space'] = true;
+                } else {
+                  const playerScreenX = this.player.x - this.camX;
+                  if (clickX < playerScreenX) {
+                    this.keys['KeyA'] = true;
+                    this.keys['KeyD'] = false;
+                  } else {
+                    this.keys['KeyD'] = true;
+                    this.keys['KeyA'] = false;
+                  }
+                }
+              } else if (e.button === 2) { // Right Click
+                this.keys['Space'] = true;
+              }
+              return;
+            }
+            const rect = this.canvas.getBoundingClientRect();
+            const x = Math.round((e.clientX - rect.left + this.camX) / this.editor.snap) * this.editor.snap;
+            const y = Math.round((e.clientY - rect.top) / this.editor.snap) * this.editor.snap;
+  
+            if (e.button === 0) { // Left Click
+              this.editor.startPos = { x, y };
+            } else if (e.button === 2) { // Right Click
+              this.deleteAt(x, y);
+            }
+          };
+  
+          this.canvas.onmousemove = (e) => {
+            if (!this.editor.active) {
+              if (e.buttons === 1) { // Left button held
+                const rect = this.canvas.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const clickY = e.clientY - rect.top;
+  
+                if (clickY >= rect.height * 0.35) {
+                  const playerScreenX = this.player.x - this.camX;
+                  if (clickX < playerScreenX) {
+                    this.keys['KeyA'] = true;
+                    this.keys['KeyD'] = false;
+                  } else {
+                    this.keys['KeyD'] = true;
+                    this.keys['KeyA'] = false;
+                  }
+                }
+              }
+              return;
+            }
+            const rect = this.canvas.getBoundingClientRect();
+            this.editor.currentPos = {
+              x: Math.round((e.clientX - rect.left + this.camX) / this.editor.snap) * this.editor.snap,
+              y: Math.round((e.clientY - rect.top) / this.editor.snap) * this.editor.snap
+            };
+          };
+  
+          this.canvas.onmouseup = (e) => {
+            if (!this.editor.active) {
+              this.keys['KeyA'] = false;
+              this.keys['KeyD'] = false;
+              this.keys['Space'] = false;
+              return;
+            }
+            if (!this.editor.startPos) return;
+            if (e.button === 0) {
+              const x1 = this.editor.startPos.x;
+              const y1 = this.editor.startPos.y;
+              const x2 = this.editor.currentPos.x;
+              const y2 = this.editor.currentPos.y;
+  
+              const w = Math.abs(x2 - x1);
+              const h = Math.abs(y2 - y1);
+              const x = Math.min(x1, x2);
+              const y = Math.min(y1, y2);
+  
+              if (this.editor.tool === 'platform' && w > 5 && h > 5) {
+                this.platforms.push({ x, y, w, h });
+              } else if (this.editor.tool === 'saw') {
+                this.saws.push({ x: x1, y: y1, r: Math.max(10, w) });
+              } else if (this.editor.tool === 'laser') {
+                this.lasers.push({ x, y, w: Math.max(10, w), h: Math.max(10, h) });
+              } else if (this.editor.tool === 'spike') {
+                this.spikes.push({ x, y, w: Math.max(10, w), h: Math.max(10, h) });
+              } else if (this.editor.tool === 'spawn') {
+                this.spawnPos = { x: x1, y: y1 };
+                alert(`NEW SPAWN POINT SET: ${x1}, ${y1}`);
+              } else if (this.editor.tool === 'orb') {
+                this.orbs.push({ x: x1, y: y1, collected: false });
+              } else if (this.editor.tool === 'goal') {
+                this.goal = { x: x1, y: y1, w: 30, h: 30 };
+                alert(`NEW EXIT GATE SET: ${x1}, ${y1}`);
+              }
+            }
+            this.editor.startPos = null;
+          };
+  
+          this.canvas.oncontextmenu = (e) => e.preventDefault();
+        },
+  
+        deleteAt(x, y) {
+          this.platforms = this.platforms.filter(p => !(x >= p.x && x <= p.x + p.w && y >= p.y && y <= p.y + p.h));
+          this.saws = this.saws.filter(s => Math.sqrt((x - s.x) ** 2 + (y - s.y) ** 2) > s.r);
+          this.lasers = this.lasers.filter(l => !(x >= l.x && x <= l.x + l.w && y >= l.y && y <= l.y + l.h));
+          this.spikes = this.spikes.filter(s => !(x >= s.x && x <= s.x + s.w && y >= s.y && y <= s.y + s.h));
+          this.orbs = this.orbs.filter(o => Math.sqrt((x - o.x)**2 + (y - o.y)**2) > 15);
+        },
+  
+        clearLevel() {
+          if (confirm("CLEAR ALL ENTITIES IN THIS LEVEL?")) {
+              this.platforms = [];
+              this.saws = [];
+              this.lasers = [];
+              this.spikes = [];
+              this.orbs = [];
+          }
+        },
+  
+        loop() {
+          this.frame++;
+          if (this.shake > 0) this.shake *= 0.9;
+          if (this.shake < 0.1) this.shake = 0;
+  
+          // Basic Time Scaling
+          if (this.timeScale >= 1) {
+            for(let i=0; i < Math.floor(this.timeScale); i++) this.update();
+            if (Math.random() < this.timeScale % 1) this.update();
+          } else {
+            if (this.frame % Math.round(1/this.timeScale) === 0) this.update();
+          }
+  
+          this.draw();
+          this.loopId = requestAnimationFrame(() => this.loop());
+        },
+  
+        update() {
+          if (this.isRewinding) return;
+          const p = this.player;
+  
+          // Horizontal Movement with Friction
+          if (!p.isDashing) {
+            if (this.keys['ArrowLeft'] || this.keys['KeyA']) {
+              p.vx -= this.accel;
+              p.dashDir = -1;
+            }
+            else if (this.keys['ArrowRight'] || this.keys['KeyD']) {
+              p.vx += this.accel;
+              p.dashDir = 1;
+            }
+            else {
+              p.vx *= this.friction;
+            }
+            p.vx = Math.max(-this.maxSpeed, Math.min(this.maxSpeed, p.vx));
+          }
+  
+          // Jump & Double Jump
+          const jumpPressed = (this.keys['ArrowUp'] || this.keys['Space'] || this.keys['KeyW']);
+          if (jumpPressed && !p.lastJumpPressed) {
+            if (p.onGrounded) {
+              p.vy = this.jump;
+              p.onGrounded = false;
+              this.shake = 5;
+              this.spawnParticles(p.x + p.w / 2, p.y + p.h, 5, '#FFF');
+            } else if (p.canDoubleJump) {
+              p.vy = this.jump * 0.9;
+              p.canDoubleJump = false;
+              this.shake = 3;
+              this.spawnParticles(p.x + p.w / 2, p.y + p.h, 8, '#00FFD1');
+            }
+          }
+          p.lastJumpPressed = jumpPressed;
+  
+          // Dash
+          const dashPressed = this.keys['ShiftLeft'] || this.keys['ShiftRight'] || this.keys['KeyK'];
+          if (dashPressed && !p.lastDashPressed && !p.isDashing) {
+            p.isDashing = true;
+            p.dashTime = 12;
+            p.vy = 0;
+            p.vx = p.dashDir * this.dashSpeed;
+            this.shake = 8;
+            this.spawnParticles(p.x + p.w / 2, p.y + p.h / 2, 10, '#00FFD1');
+          }
+          p.lastDashPressed = dashPressed;
+  
+          if (p.isDashing) {
+            p.dashTime--;
+            p.vy = 0;
+            document.getElementById('zone-viewport').classList.add('glitch-veil');
+            if (p.dashTime <= 0) {
+              p.isDashing = false;
+              p.vx *= 0.3;
+              document.getElementById('zone-viewport').classList.remove('glitch-veil');
+            }
+            p.trail.push({ x: p.x, y: p.y, o: 1 });
+            if (p.trail.length > 8) p.trail.shift();
+          } else {
+            p.vy += this.gravity;
+            if (p.trail.length > 0) p.trail.shift();
+          }
+  
+          // Update Particles
+          this.particles = this.particles.filter(part => {
+            part.x += part.vx;
+            part.y += part.vy;
+            part.life -= part.decay;
+            return part.life > 0;
+          });
+  
+          p.x += p.vx;
+          this.checkCollisions('x');
+          p.y += p.vy;
+          p.onGrounded = false;
+          this.checkCollisions('y');
+  
+          if (p.onGrounded) p.canDoubleJump = true;
+  
+          // Camera
+          this.camX = Math.max(0, p.x - this.canvas.width / 2 + 50);
+  
+          // Goal
+          const totalOrbs = this.orbs.length;
+          if (this.orbsCollected >= totalOrbs) {
+              if (p.x + p.w > this.goal.x && p.x < this.goal.x + this.goal.w &&
+                  p.y + p.h > this.goal.y && p.y < this.goal.y + this.goal.h) {
+                  cancelAnimationFrame(this.loopId);
+                  Game.next();
+              }
+          }
+  
+          // Orbs
+          this.orbs.forEach(o => {
+              if (!o.collected) {
+                  const dx = (p.x + p.w/2) - o.x;
+                  const dy = (p.y + p.h/2) - o.y;
+                  const dist = Math.sqrt(dx*dx + dy*dy);
+                  if (dist < 25) {
+                      o.collected = true;
+                      this.orbsCollected++;
+                      this.spawnParticles(o.x, o.y, 10, '#FFD700');
+                      this.shake = 5;
+                  }
+              }
+          });
+  
+          // Hazards
+          if (p.y > this.canvas.height + 200) this.die();
+  
+          // Spikes
+          this.spikes.forEach(s => {
+            if (this.rectIntersect(p, s)) this.die();
+          });
+  
+          // Saws (Circular collision)
+          this.saws.forEach(s => {
+            const dx = (p.x + p.w / 2) - s.x;
+            const dy = (p.y + p.h / 2) - s.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < s.r + 8) this.die();
+          });
+  
+          // Lasers
+          this.lasers.forEach(l => {
+            const active = Math.floor(this.frame / 60) % 2 === 0;
+            if (active && this.rectIntersect(p, l)) this.die();
+          });
+        },
+  
+        rectIntersect(r1, r2) {
+          return r1.x + r1.w > r2.x && r1.x < r2.x + r2.w &&
+            r1.y + r1.h > r2.y && r1.y < r2.y + r2.h;
+        },
+  
+        die() {
+          if (this.isRewinding) return;
+          this.isRewinding = true;
+          
+          const viewport = document.getElementById('zone-viewport');
+          viewport.classList.add('rewind-glitch');
+          
+          this.spawnParticles(this.player.x, this.player.y, 30, '#FFF');
+          Game.showRageBait();
+  
+          // Slow down "rewind" feel
+          const startX = this.player.x;
+          const startY = this.player.y;
+          
+          setTimeout(() => {
+            viewport.classList.remove('rewind-glitch');
+            this.player.x = this.spawnPos.x; 
+            this.player.y = this.spawnPos.y;
+            this.player.vx = 0; this.player.vy = 0;
+            this.player.isDashing = false;
+            this.player.canDoubleJump = true;
+            this.player.trail = [];
+            
+            // Regenerate Orbs
+            this.orbs.forEach(o => o.collected = false);
+            this.orbsCollected = 0;
+            
+            this.isRewinding = false;
+          }, 4000); // Sync with rage bait time
+        },
+  
+        spawnParticles(x, y, count, color) {
+          for (let i = 0; i < count; i++) {
+            this.particles.push({
+              x, y,
+              vx: (Math.random() - 0.5) * 6,
+              vy: (Math.random() - 0.5) * 6,
+              life: 1.0,
+              decay: 0.02 + Math.random() * 0.02,
+              size: 2 + Math.random() * 4,
+              color
+            });
+          }
+        },
+  
+        checkCollisions(axis) {
+          this.platforms.forEach(p => {
+            if (this.player.x + this.player.w > p.x && this.player.x < p.x + p.w &&
+              this.player.y + this.player.h > p.y && this.player.y < p.y + p.h) {
+              if (axis === 'x') {
+                if (this.player.vx > 0) this.player.x = p.x - this.player.w;
+                else this.player.x = p.x + p.w;
+                this.player.vx = 0;
+              } else {
+                if (this.player.vy > 0) {
+                  this.player.y = p.y - this.player.h;
+                  this.player.onGrounded = true;
+                } else {
+                  this.player.y = p.y + p.h;
+                }
+                this.player.vy = 0;
+              }
+            }
+          });
+        },
+  
+        draw() {
+          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+          
+          // Removed Shake Offset (User requested no shake)
+          this.ctx.save();
+  
+          // --- DRAW BACKGROUND (Parallax) ---
+          // Layer 1: Distant Grid
+          this.ctx.save();
+          this.ctx.strokeStyle = '#0a0a20';
+          this.ctx.lineWidth = 1;
+          const p1 = (this.camX * 0.2) % 100;
+          for(let x = -p1; x < this.canvas.width; x += 100) {
+            this.ctx.beginPath(); this.ctx.moveTo(x, 0); this.ctx.lineTo(x, this.canvas.height); this.ctx.stroke();
+          }
+          for(let y = 0; y < this.canvas.height; y += 100) {
+            this.ctx.beginPath(); this.ctx.moveTo(0, y); this.ctx.lineTo(this.canvas.width, y); this.ctx.stroke();
+          }
+          this.ctx.restore();
+  
+          // Layer 2: Near Grid
+          this.ctx.save();
+          this.ctx.strokeStyle = '#101030';
+          this.ctx.lineWidth = 2;
+          const p2 = (this.camX * 0.5) % 50;
+          for(let x = -p2; x < this.canvas.width; x += 50) {
+            this.ctx.beginPath(); this.ctx.moveTo(x, 0); this.ctx.lineTo(x, this.canvas.height); this.ctx.stroke();
+          }
+          for(let y = 0; y < this.canvas.height; y += 50) {
+            this.ctx.beginPath(); this.ctx.moveTo(0, y); this.ctx.lineTo(this.canvas.width, y); this.ctx.stroke();
+          }
+          this.ctx.restore();
+  
+          this.ctx.translate(-this.camX, 0);
+  
+          // Draw Editor Grid
+          if (this.editor.active) {
+            this.ctx.strokeStyle = '#111';
+            this.ctx.lineWidth = 1;
+            for (let x = 0; x < this.goal.x + 1000; x += this.editor.snap) {
+              this.ctx.beginPath(); this.ctx.moveTo(x, 0); this.ctx.lineTo(x, this.canvas.height); this.ctx.stroke();
+            }
+            for (let y = 0; y < this.canvas.height; y += this.editor.snap) {
+              this.ctx.beginPath(); this.ctx.moveTo(0, y); this.ctx.lineTo(this.goal.x + 1000, y); this.ctx.stroke();
+            }
+          }
+  
+          // Draw Goal (Only if ALL orbs collected)
+          const totalOrbs = this.orbs.length;
+          if (this.orbsCollected >= totalOrbs) {
+              this.ctx.fillStyle = '#FFD700';
+              this.ctx.shadowBlur = 15;
+              this.ctx.shadowColor = '#FFD700';
+              this.ctx.fillRect(this.goal.x, this.goal.y, this.goal.w, this.goal.h);
+              this.ctx.shadowBlur = 0;
+              
+              // Goal Aura
+              this.ctx.strokeStyle = '#FFD700';
+              this.ctx.lineWidth = 2;
+              this.ctx.strokeRect(this.goal.x - 5, this.goal.y - 5, this.goal.w + 10, this.goal.h + 10);
+          }
+  
+          // Draw Orbs
+          this.orbs.forEach(o => {
+              if (!o.collected) {
+                  this.ctx.fillStyle = '#FFD700';
+                  this.ctx.shadowBlur = 10;
+                  this.ctx.shadowColor = '#FFD700';
+                  this.ctx.beginPath();
+                  this.ctx.arc(o.x, o.y, 8 + Math.sin(this.frame * 0.1) * 2, 0, Math.PI * 2);
+                  this.ctx.fill();
+                  this.ctx.shadowBlur = 0;
+              }
+          });
+  
+          // Draw Platforms with Shadows
+          this.platforms.forEach(p => {
+            // Shadow
+            this.ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            this.ctx.fillRect(p.x + 5, p.y + 5, p.w, p.h);
+            
+            // Main
+            this.ctx.fillStyle = '#1a1a2e';
+            this.ctx.strokeStyle = '#4e4e8e';
+            this.ctx.lineWidth = 2;
+            this.ctx.fillRect(p.x, p.y, p.w, p.h);
+            this.ctx.strokeRect(p.x, p.y, p.w, p.h);
+            
+            // Subtle glow on top
+            this.ctx.fillStyle = 'rgba(255,255,255,0.05)';
+            this.ctx.fillRect(p.x, p.y, p.w, 4);
+          });
+  
+          // Draw Spikes
+          this.ctx.fillStyle = '#F00';
+          this.spikes.forEach(s => {
+            this.ctx.beginPath();
+            this.ctx.moveTo(s.x, s.y + s.h);
+            this.ctx.lineTo(s.x + s.w / 2, s.y);
+            this.ctx.lineTo(s.x + s.w, s.y + s.h);
+            this.ctx.fill();
+          });
+  
+          // Draw Saws
+          this.saws.forEach(s => {
+            this.ctx.save();
+            this.ctx.translate(s.x, s.y);
+            this.ctx.rotate(this.frame * 0.2);
+            this.ctx.fillStyle = '#888';
+            this.ctx.beginPath();
+            for (let i = 0; i < 8; i++) {
+              const ang = (i / 8) * Math.PI * 2;
+              this.ctx.lineTo(Math.cos(ang) * s.r, Math.sin(ang) * s.r);
+              this.ctx.lineTo(Math.cos(ang + 0.1) * (s.r + 10), Math.sin(ang + 0.1) * (s.r + 10));
+            }
+            this.ctx.closePath();
+            this.ctx.fill();
+            this.ctx.fillStyle = '#444';
+            this.ctx.beginPath();
+            this.ctx.arc(0, 0, s.r * 0.5, 0, Math.PI * 2);
+            this.ctx.fill();
+            this.ctx.restore();
+          });
+  
+          // Draw Lasers
+          const laserActive = Math.floor(this.frame / 60) % 2 === 0;
+          this.lasers.forEach(l => {
+            this.ctx.fillStyle = laserActive ? 'rgba(255, 0, 0, 0.4)' : 'rgba(255, 0, 0, 0.05)';
+            this.ctx.fillRect(l.x, l.y, l.w, l.h);
+            if (laserActive) {
+              this.ctx.strokeStyle = '#F00';
+              this.ctx.lineWidth = 2;
+              this.ctx.strokeRect(l.x, l.y, l.w, l.h);
+              
+              // Core beam
+              this.ctx.fillStyle = '#FFF';
+              this.ctx.fillRect(l.x + l.w/2 - 1, l.y, 2, l.h);
+            }
+          });
+  
+          // Editor Preview
+          if (this.editor.active && this.editor.startPos && this.editor.currentPos) {
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            const x1 = this.editor.startPos.x;
+            const y1 = this.editor.startPos.y;
+            const x2 = this.editor.currentPos.x;
+            const y2 = this.editor.currentPos.y;
+            if (this.editor.tool === 'platform' || this.editor.tool === 'laser' || this.editor.tool === 'spike') {
+              this.ctx.fillRect(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1));
+            } else if (this.editor.tool === 'saw') {
+              this.ctx.beginPath();
+              this.ctx.arc(x1, y1, Math.abs(x2 - x1), 0, Math.PI * 2);
+              this.ctx.fill();
+            } else if (this.editor.tool === 'spawn') {
+              this.ctx.beginPath();
+              this.ctx.arc(x1, y1, 10, 0, Math.PI * 2);
+              this.ctx.stroke();
+            } else if (this.editor.tool === 'orb') {
+              this.ctx.beginPath();
+              this.ctx.arc(x1, y1, 8, 0, Math.PI * 2);
+              this.ctx.fill();
+            } else if (this.editor.tool === 'goal') {
+              this.ctx.fillStyle = '#FFD700';
+              this.ctx.fillRect(x1, y1, 30, 30);
+            }
+          }
+  
+          // Draw Particles
+          this.particles.forEach(part => {
+            this.ctx.globalAlpha = part.life;
+            this.ctx.fillStyle = part.color;
+            this.ctx.fillRect(part.x, part.y, part.size, part.size);
+          });
+          this.ctx.globalAlpha = 1.0;
+  
+          // Draw Trail
+          this.player.trail.forEach((t, i) => {
+            this.ctx.fillStyle = `rgba(0, 255, 209, ${0.05 + (i / 8) * 0.2})`;
+            this.ctx.fillRect(t.x, t.y, this.player.w, this.player.h);
+          });
+  
+          // Draw Player (The "Hacker")
+          this.ctx.save();
+          this.ctx.translate(this.player.x + this.player.w / 2, this.player.y + this.player.h / 2);
+  
+          // Tilt based on velocity
+          this.ctx.rotate(this.player.vx * 0.05);
+          if (this.player.dashDir === -1) this.ctx.scale(-1, 1);
+  
+          // Body Shape (Thicker, more robotic/armored)
+          this.ctx.fillStyle = this.player.color;
+          this.ctx.shadowBlur = 15;
+          this.ctx.shadowColor = this.player.color;
+  
+          // Main Body (Rectangle with rounded feel)
+          this.ctx.beginPath();
+          if (this.ctx.roundRect) {
+            this.ctx.roundRect(-8, -12, 16, 22, 4);
+          } else {
+            this.ctx.rect(-8, -12, 16, 22);
+          }
+          this.ctx.fill();
+  
+          // Visor/Eye
+          this.ctx.fillStyle = '#000';
+          this.ctx.fillRect(0, -10, 8, 3);
+          this.ctx.fillStyle = '#FFF';
+          this.ctx.fillRect(4, -9, 2, 1);
+  
+          // Backpack/Engine
+          this.ctx.fillStyle = '#008F11'; // Emerald
+          this.ctx.fillRect(-12, -8, 4, 14);
+  
+          // Feet/Legs (Animated)
+          const isMoving = Math.abs(this.player.vx) > 0.1 && this.player.onGrounded;
+          const walkCycle = Math.sin(this.frame * 0.3) * 6;
+          
+          this.ctx.fillStyle = this.player.color;
+          // Left Foot
+          this.ctx.fillRect(-6, 10 + (isMoving ? walkCycle : 0), 4, 4);
+          // Right Foot
+          this.ctx.fillRect(2, 10 + (isMoving ? -walkCycle : 0), 4, 4);
+  
+          this.ctx.shadowBlur = 0;
+          this.ctx.restore();
+  
+          // Hitbox Debug
+          if (this.showHitboxes) {
+            this.ctx.strokeStyle = 'red';
+            this.ctx.lineWidth = 1;
+            this.ctx.strokeRect(this.player.x, this.player.y, this.player.w, this.player.h);
+            
+            this.platforms.forEach(p => this.ctx.strokeRect(p.x, p.y, p.w, p.h));
+            this.spikes.forEach(s => this.ctx.strokeRect(s.x, s.y, s.w, s.h));
+            this.lasers.forEach(l => this.ctx.strokeRect(l.x, l.y, l.w, l.h));
+            this.orbs.forEach(o => {
+                this.ctx.beginPath();
+                this.ctx.arc(o.x, o.y, 10, 0, Math.PI * 2);
+                this.ctx.stroke();
+            });
+          }
+  
+          this.ctx.restore(); // End of main draw state
+        }
+      };
+  
+      // --- LEVEL DEFINITIONS ---
+      const Levels = {
+        11: {
+          render(container) {
+            container.innerHTML = `
+                          <div class="terminal-block">
+                              <p>> [SYSTEM] LEVEL 11: OUTPUT ORACLE</p>
+                              <p>> PREDICT THE OUTPUT OF THE FOLLOWING SNIPPET:</p>
+                              <div class="code-block">
+  #include &lt;stdio.h&gt;
+  int main() {
+      char x = 'A';
+      printf("%d", sizeof(x));
+      return 0;
+  }</div>
+                              <div class="input-area">
+                                  <input type="text" id="ans-11" placeholder="ENTER RESULT..." autofocus>
+                                  <button onclick="Levels[11].check()">SUBMIT</button>
+                              </div>
+                          </div>
+                      `;
+          },
+          check() {
+            const val = document.getElementById('ans-11').value.trim();
+            if (val === "1") Game.next();
+            else Game.fail();
+          }
+        },
+        12: {
+          render(container) {
+            container.innerHTML = `
+                          <div class="terminal-block">
+                              <p>> [SYSTEM] LEVEL 12: POINTER PUZZLE</p>
+                              <p>> WHAT IS THE FINAL VALUE OF 'a'?</p>
+                              <div class="code-block">
+  int a = 10;
+  int *p = &a;
+  *p = *p + 5;
+  p = NULL;
+                              </div>
+                              <div class="input-area">
+                                  <input type="text" id="ans-12" placeholder="ENTER VALUE..." autofocus>
+                                  <button onclick="Levels[12].check()">SUBMIT</button>
+                              </div>
+                          </div>
+                      `;
+          },
+          check() {
+            const val = document.getElementById('ans-12').value.trim();
+            if (val === "15") Game.next();
+            else Game.fail();
+          }
+        },
+        13: {
+          render(container) {
+            container.innerHTML = `
+                          <div class="terminal-block">
+                              <p>> [SYSTEM] LEVEL 13: FIX THE BUG</p>
+                              <p>> IDENTIFY THE BUG IN THIS SNIPPET:</p>
+                              <div class="code-block">
+  1  int main() {
+  2      int arr[5] = {1, 2, 3, 4, 5};
+  3      for (int i = 0; i <= 5; i++) {
+  4          printf("%d", arr[i]);
+  5      }
+  6      return 0;
+  7  }</div>
+                              <div class="input-area" style="flex-direction:column; align-items:flex-start;">
+                                  <label style="font-size:12px; margin-bottom:5px;">LINE NUMBER:</label>
+                                  <input type="text" id="ans-13-line" placeholder="L#" style="width:100px; 
+margin-bottom:5px;">
+                                  <label style="font-size:12px; margin-bottom:5px;">ERROR TYPE:</label>
+                                  <select id="ans-13-type" style="background:black; color:var(--accent-cyan); 
+border:1px solid var(--accent-cyan); padding:10px; font-family:inherit; width:100%;">
+                                      <option value="">SELECT...</option>
+                                      <option value="seg">Segmentation Fault</option>
+                                      <option value="overflow">Buffer Overflow</option>
+                                      <option value="infinite">Infinite Loop</option>
+                                      <option value="leak">Memory Leak</option>
+                                  </select>
+                                  <button onclick="Levels[13].check()" style="margin-top:10px; 
+width:100%;">VALIDATE</button>
+                              </div>
+                          </div>
+                      `;
+          },
+          check() {
+            const line = document.getElementById('ans-13-line').value.trim();
+            const type = document.getElementById('ans-13-type').value;
+            if (line === "3" && type === "overflow") Game.next();
+            else Game.fail();
+          }
+        },
+        14: {
+          render(container) {
+            container.innerHTML = `
+                          <div class="terminal-block">
+                              <p>> [SYSTEM] LEVEL 14: FILL THE BLANK</p>
+                              <p>> COMPLETE THE RECURSIVE FUNCTION:</p>
+                              <div class="code-block">
+  int fact(int n) {
+      if (n <= 1) return [___1___];
+      return n * [___2___]([___3___]);
+  }</div>
+                              <div class="input-area" style="flex-direction:column; gap:5px;">
+                                  <input type="text" id="ans-14-1" placeholder="BLANK 1" style="padding:5px 10px;">
+                                  <input type="text" id="ans-14-2" placeholder="BLANK 2" style="padding:5px 10px;">
+                                  <input type="text" id="ans-14-3" placeholder="BLANK 3" style="padding:5px 10px;">
+                                  <button onclick="Levels[14].check()" style="margin-top:5px;">COMPILE</button>
+                              </div>
+                          </div>
+                      `;
+          },
+          check() {
+            const b1 = document.getElementById('ans-14-1').value.trim();
+            const b2 = document.getElementById('ans-14-2').value.trim();
+            const b3 = document.getElementById('ans-14-3').value.trim();
+            if (b1 === "1" && b2 === "fact" && (b3 === "n-1" || b3 === "n - 1")) Game.next();
+            else Game.fail();
+          }
+        },
+        15: {
+          render(container) {
+            this.score = 0;
+            this.timeLeft = 60;
+            container.innerHTML = `
+                          <div class="terminal-block">
+                              <p>> [SYSTEM] LEVEL 15: SPEED COMPILE</p>
+                              <p>> RAPID FIRE CHALLENGE. SCORE 40/50 TO PASS.</p>
+                              <div style="font-size:24px; margin:20px 0; color:var(--primary-amber);" 
+id="speed-timer">60s</div>
+                              <div id="speed-question-box" style="background:rgba(255,255,255,0.05); padding:20px; 
+border-radius:4px;">
+                                  <p id="speed-q">LOADING...</p>
+                                  <div class="input-area">
+                                      <input type="text" id="speed-ans" placeholder="?" autofocus>
+                                  </div>
+                              </div>
+                              <p style="margin-top:20px;">PROGRESS: <span id="speed-score">0</span> / 50</p>
+                          </div>
+                      `;
+            this.start(container);
+          },
+          start(container) {
+            const timer = setInterval(() => {
+              this.timeLeft--;
+              const timerEl = document.getElementById('speed-timer');
+              if (!timerEl) { clearInterval(timer); return; }
+              timerEl.innerText = `${this.timeLeft}s`;
+              if (this.timeLeft <= 0) {
+                clearInterval(timer);
+                if (this.score >= 40) Game.next();
+                else Game.fail();
+              }
+            }, 1000);
+  
+            const input = document.getElementById('speed-ans');
+            input.addEventListener('keydown', (e) => {
+              if (e.key === 'Enter') {
+                this.validate();
+              }
+            });
+  
+            this.nextQ();
+          },
+          questions: [
+            { q: "sizeof(int) on 64-bit?", a: "4" },
+            { q: "Value of 'x' in x = 5 << 1?", a: "10" },
+            { q: "Operator for address-of?", a: "&" },
+            { q: "Keyword to return from function?", a: "return" },
+            { q: "NULL is often defined as?", a: "0" },
+            { q: "Standard library for printf?", a: "stdio.h" },
+            { q: "Result of 7 % 3?", a: "1" },
+            { q: "Increment operator?", a: "++" },
+            { q: "Logical AND operator?", a: "&&" }
+          ],
+          currentQ: null,
+          nextQ() {
+            const qEl = document.getElementById('speed-q');
+            if (!qEl) return;
+            this.currentQ = this.questions[Math.floor(Math.random() * this.questions.length)];
+            qEl.innerText = this.currentQ.q;
+            document.getElementById('speed-ans').value = '';
+          },
+          validate() {
+            const ans = document.getElementById('speed-ans').value.trim();
+            if (ans === this.currentQ.a) {
+              this.score += 10;
+              document.getElementById('speed-score').innerText = this.score;
+              if (this.score >= 40) {
+                // Delay slightly for feel
+                setTimeout(() => Game.next(), 500);
+              } else {
+                this.nextQ();
+              }
+            } else {
+              this.nextQ();
+            }
+          }
+        },
+        16: {
+          pool: [
+            {
+              q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int a = 5;\n   printf(\"%d %d %d\", a, 
+a++, ++a);\n}",
+              options: ["5 5 7", "5 6 7", "Undefined", "6 6 7"],
+              a: "Undefined"
+            },
+            {
+              q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   char x = 130;\n   printf(\"%d\", x);\n}",
+              options: ["130", "-126", "Depends", "Undefined"],
+              a: "Depends"
+            },
+            {
+              q: "What is the output?\n\n#include<stdio.h>\n#define SQR(x) x*x\nint main(){\n   printf(\"%d\", 
+SQR(2+1));\n}",
+              options: ["9", "5", "6", "Undefined"],
+              a: "5"
+            }
+          ],
+          render(container) {
+            const q = this.pool[Game.state.ouroborosLoops % 3];
+            const optionsHtml = q.options.map(opt => `
+              <button onclick="Levels[16].check('${opt}', '${q.a}')" class="ouro-btn">${opt}</button>
+            `).join('');
+            container.innerHTML = `
+                          <div class="terminal-block zone-2-theme" style="position:relative;">
+                              <p>> [SYSTEM] LEVEL 16: THE GATE (OUROBOROS LOOP)</p>
+                              <pre class="code-block" style="border-left-color:var(--ouro-emerald); white-space: 
+pre-wrap; font-family: 'JetBrains Mono', monospace; text-align: left; margin: 15px 0; font-size: 0.9rem;">${q.q}</pre>
+                              <div class="ouro-options-grid">
+                                  ${optionsHtml}
+                              </div>
+                          </div>
+                      `;
+          },
+          check(selected, correct) {
+            if (selected === correct) Game.next();
+            else Game.fail();
+          }
+        },
+        17: {
+          pool: [
+            {
+              q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int x = 10;\n   printf(\"%d\", 
+x+++10);\n}",
+              options: ["20", "21", "22", "Undefined"],
+              a: "20"
+            },
+            {
+              q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int a = 5;\n   printf(\"%d\", 
+sizeof(a++));\n}",
+              options: ["4", "5", "6", "Undefined"],
+              a: "4"
+            },
+            {
+              q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int x = 3;\n   printf(\"%d\", x+++x);\n}",
+              options: ["6", "7", "8", "Undefined"],
+              a: "7"
+            }
+          ],
+          render(container) {
+            const q = this.pool[Game.state.ouroborosLoops % 3];
+            const optionsHtml = q.options.map(opt => `
+              <button onclick="Levels[17].check('${opt}', '${q.a}')" class="ouro-btn">${opt}</button>
+            `).join('');
+            container.innerHTML = `
+                          <div class="terminal-block zone-2-theme" style="position:relative;">
+                              <p>> [SYSTEM] LEVEL 17: OUROBOROS LOOP</p>
+                              <pre class="code-block" style="border-left-color:var(--ouro-emerald); white-space: 
+pre-wrap; font-family: 'JetBrains Mono', monospace; text-align: left; margin: 15px 0; font-size: 0.9rem;">${q.q}</pre>
+                              <div class="ouro-options-grid">
+                                  ${optionsHtml}
+                              </div>
+                          </div>
+                      `;
+          },
+          check(selected, correct) {
+            if (selected === correct) Game.next();
+            else Game.fail();
+          }
+        },
+        18: {
+          pool: [
+            {
+              q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int a = 4;\n   printf(\"%d\", a<<1 + 
+1);\n}",
+              options: ["8", "9", "16", "Undefined"],
+              a: "16"
+            },
+            {
+              q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int x = 5;\n   if(x = 0)\n      
+printf(\"A\");\n   else\n      printf(\"B\");\n}",
+              options: ["A", "B", "0", "Error"],
+              a: "B"
+            },
+            {
+              q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int x = 2;\n   printf(\"%d\", 1 << x + 
+1);\n}",
+              options: ["4", "6", "8", "16"],
+              a: "8"
+            }
+          ],
+          render(container) {
+            const q = this.pool[Game.state.ouroborosLoops % 3];
+            const optionsHtml = q.options.map(opt => `
+              <button onclick="Levels[18].check('${opt}', '${q.a}')" class="ouro-btn">${opt}</button>
+            `).join('');
+            container.innerHTML = `
+                          <div class="terminal-block zone-2-theme" style="position:relative;">
+                              <p>> [SYSTEM] LEVEL 18: OUROBOROS LOOP</p>
+                              <pre class="code-block" style="border-left-color:var(--ouro-emerald); white-space: 
+pre-wrap; font-family: 'JetBrains Mono', monospace; text-align: left; margin: 15px 0; font-size: 0.9rem;">${q.q}</pre>
+                              <div class="ouro-options-grid">
+                                  ${optionsHtml}
+                              </div>
+                          </div>
+                      `;
+          },
+          check(selected, correct) {
+            if (selected === correct) Game.next();
+            else Game.fail();
+          }
+        },
+        19: {
+          pool: [
+            {
+              q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   printf(\"%d\", printf(\"Hi\"));\n}",
+              options: ["Hi", "2", "Hi2", "Error"],
+              a: "Hi2"
+            },
+            {
+              q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int x = 5;\n   printf(\"%d\", x & 1 ? 100 
+: 200);\n}",
+              options: ["0", "1", "100", "200"],
+              a: "100"
+            },
+            {
+              q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int a = 3;\n   printf(\"%d\", 
+a+++a+++a);\n}",
+              options: ["9", "10", "11", "Undefined"],
+              a: "Undefined"
+            }
+          ],
+          render(container) {
+            const q = this.pool[Game.state.ouroborosLoops % 3];
+            const optionsHtml = q.options.map(opt => `
+              <button onclick="Levels[19].check('${opt}', '${q.a}')" class="ouro-btn">${opt}</button>
+            `).join('');
+            container.innerHTML = `
+                          <div class="terminal-block zone-2-theme" style="position:relative;">
+                              <p>> [SYSTEM] LEVEL 19: OUROBOROS LOOP</p>
+                              <pre class="code-block" style="border-left-color:var(--ouro-emerald); white-space: 
+pre-wrap; font-family: 'JetBrains Mono', monospace; text-align: left; margin: 15px 0; font-size: 0.9rem;">${q.q}</pre>
+                              <div class="ouro-options-grid">
+                                  ${optionsHtml}
+                              </div>
+                          </div>
+                      `;
+          },
+          check(selected, correct) {
+            if (selected === correct) Game.next();
+            else Game.fail();
+          }
+        },
+        20: {
+          pool: [
+            {
+              q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int x = 7;\n   printf(\"%d\", x ^ 2);\n}",
+              options: ["49", "5", "9", "14"],
+              a: "5"
+            },
+            {
+              q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int x = 1;\n   printf(\"%d\", x == 1 && 
+x++ == 1);\n}",
+              options: ["0", "1", "2", "Undefined"],
+              a: "1"
+            },
+            {
+              q: "What is the output?\n\n#include<stdio.h>\nint main(){\n   int x = 0;\n   printf(\"%d\", ++x && 
+x++);\n}",
+              options: ["0", "1", "2", "Undefined"],
+              a: "1"
+            }
+          ],
+          render(container) {
+            const q = this.pool[Game.state.ouroborosLoops % 3];
+            const optionsHtml = q.options.map(opt => `
+              <button onclick="Levels[20].check('${opt}', '${q.a}')" class="ouro-btn">${opt}</button>
+            `).join('');
+            container.innerHTML = `
+                          <div class="terminal-block zone-2-theme" style="position:relative;">
+                              <p>> [SYSTEM] LEVEL 20: THE TAIL (OUROBOROS LOOP)</p>
+                              <pre class="code-block" style="border-left-color:var(--ouro-emerald); white-space: 
+pre-wrap; font-family: 'JetBrains Mono', monospace; text-align: left; margin: 15px 0; font-size: 0.9rem;">${q.q}</pre>
+                              <div class="ouro-options-grid">
+                                  ${optionsHtml}
+                              </div>
+                          </div>
+                      `;
+          },
+          check(selected, correct) {
+            if (selected === correct) Game.next();
+            else Game.fail();
+          }
+        },
+        21: {
+          render(container) {
+            Platformer.init(container, {
+              platforms: [{ x: 0, y: 350, w: 150, h: 50 }, { x: 300, y: 250, w: 120, h: 20 }],
+              saws: [{ x: 200, y: 330, r: 25 }, { x: 260, y: 300, r: 25 }],
+              lasers: [{ x: 150, y: 370, w: 150, h: 10 }],
+              goal: { x: 360, y: 200, w: 30, h: 30 }
+            });
+          }
+        },
+        22: {
+          render(container) {
+            Platformer.init(container, {
+              platforms: [{ x: 0, y: 350, w: 80, h: 50 }, { x: 150, y: 300, w: 60, h: 20 }, { x: 280, y: 220, w: 60, 
+h: 20 }, { x: 400, y: 280, w: 100, h: 50 }],
+              saws: [{ x: 240, y: 280, r: 20 }],
+              lasers: [{ x: 110, y: 0, w: 20, h: 400 }, { x: 250, y: 0, w: 20, h: 400 }, { x: 370, y: 0, w: 20, h: 400 
+}],
+              goal: { x: 440, y: 230, w: 30, h: 30 }
+            });
+          }
+        },
+        23: {
+          render(container) {
+            Platformer.init(container, {
+              platforms: [{ x: 0, y: 350, w: 80, h: 50 }, { x: 150, y: 350, w: 80, h: 50 }, { x: 300, y: 350, w: 80, 
+h: 50 }, { x: 450, y: 350, w: 80, h: 50 }],
+              saws: [{ x: 110, y: 350, r: 35 }, { x: 260, y: 350, r: 35 }, { x: 410, y: 350, r: 35 }],
+              lasers: [{ x: 0, y: 180, w: 550, h: 10 }, { x: 0, y: 250, w: 550, h: 10 }],
+              goal: { x: 470, y: 300, w: 30, h: 30 }
+            });
+          }
+        },
+        24: {
+          render(container) {
+            Platformer.init(container, {
+              platforms: [{ x: 0, y: 350, w: 80, h: 50 }, { x: 500, y: 350, w: 100, h: 50 }],
+              saws: Array.from({ length: 4 }, (_, i) => ({ x: 150 + i * 90, y: 320 + Math.sin(i * 1.5) * 40, r: 25 })),
+              lasers: [{ x: 150, y: 150, w: 300, h: 10 }],
+              goal: { x: 530, y: 310, w: 30, h: 30 }
+            });
+          }
+        },
+        25: {
+          render(container) {
+            Platformer.init(container, {
+              platforms: [{ x: 0, y: 350, w: 80, h: 50 }, { x: 150, y: 280, w: 80, h: 20 }, { x: 300, y: 210, w: 80, 
+h: 20 }, { x: 450, y: 280, w: 80, h: 20 }, { x: 600, y: 350, w: 80, h: 50 }],
+              lasers: [{ x: 240, y: 0, w: 10, h: 400 }, { x: 390, y: 0, w: 10, h: 400 }],
+              saws: [{ x: 240, y: 260, r: 18 }, { x: 390, y: 190, r: 18 }],
+              goal: { x: 630, y: 300, w: 30, h: 30 }
+            });
+          }
+        }
+      };
+  
+      // Initialize
+      window.onload = () => Game.init();
+  
+    </script>
+  </body>
+  
+  </html>
+
+

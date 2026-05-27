@@ -9,19 +9,24 @@ const baseLevels = [
     { theme: 'stone', wall: '#2a2a2a', floor: '#1a1008' },
     { theme: 'metal', wall: '#1a2a3a', floor: '#0a101a' },
     { theme: 'metal', wall: '#2a1a3a', floor: '#1a0a2a' },
-    { theme: 'darksouls', wall: '#1b1b1f', floor: '#0a0a0d' }
+    { theme: 'hell', wall: '#3a0a0a', floor: '#1a0000' }
 ];
 
 for (let i = 1; i <= 25; i++) {
     const base = baseLevels[(i - 1) % baseLevels.length];
     let size = 11 + (Math.floor((i-1)/2) * 4);
     
-    // Increase difficulty for Levels 1-5 only
-    if (i === 1) size = 15;
-    if (i === 2) size = 19;
-    if (i === 3) size = 23;
-    if (i === 4) size = 27;
-    if (i === 5) size = 21;
+    // Increase difficulty for Levels 1-10
+    if (i === 1) size = 23;
+    if (i === 2) size = 29;
+    if (i === 3) size = 35;
+    if (i === 4) size = 41;
+    if (i === 5) size = 47;
+    if (i === 6) size = 53;
+    if (i === 7) size = 59;
+    if (i === 8) size = 67;
+    if (i === 9) size = 75;
+    if (i === 10) size = 85;
 
     Levels.push({
         id: i,

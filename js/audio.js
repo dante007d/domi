@@ -148,5 +148,22 @@ export const AudioSystem = {
         // Low double thud
         this.playTone(70, 'sine', 0.1, 0.3);
         setTimeout(() => this.playTone(65, 'sine', 0.15, 0.3), 150);
+    },
+
+    playGrowl() {
+        if (!this.ctx) return;
+        try {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(80 + Math.random() * 40, this.ctx.currentTime);
+            osc.frequency.linearRampToValueAtTime(30, this.ctx.currentTime + 0.8);
+            gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + 0.8);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + 0.8);
+        } catch (e) {}
     }
 };

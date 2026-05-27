@@ -1,439 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DOMINO'S EFFECT // SPECTRUM CHALLENGE</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg-color: #080810;
-      --primary-amber: #FF6B35;
-      --accent-cyan: #00FFD1;
-      --text-muted: #8888AA;
-      --terminal-green: #00FF41;
-      --phantom-purple: #9D50BB;
-      --ouro-emerald: #00FF8A;
-      --crt-flicker: rgba(18, 16, 16, 0.1);
-    }
-
-    .ouro-options-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 20px;
-      width: 100%;
-    }
-    .ouro-btn {
-      background: rgba(0, 255, 138, 0.05);
-      border: 1px solid var(--ouro-emerald);
-      color: var(--ouro-emerald);
-      padding: 12px;
-      cursor: pointer;
-      font-family: inherit;
-      font-size: 0.95rem;
-      font-weight: bold;
-      transition: all 0.2s ease-in-out;
-      border-radius: 4px;
-      text-shadow: 0 0 5px rgba(0,255,138,0.5);
-      box-shadow: 0 0 5px rgba(0,255,138,0.1);
-      text-align: center;
-    }
-    .ouro-btn:hover {
-      background: var(--ouro-emerald);
-      color: black !important;
-      box-shadow: 0 0 15px var(--ouro-emerald);
-      text-shadow: none;
-      transform: translateY(-2px);
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      user-select: none;
-    }
-
-    body {
-      background-color: var(--bg-color);
-      color: white;
-      font-family: 'JetBrains Mono', monospace;
-      height: 100vh;
-      width: 100vw;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* --- CRT Effects --- */
-    #crt-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
-        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-      background-size: 100% 4px, 3px 100%;
-      z-index: 9999;
-      pointer-events: none;
-    }
-
-    #crt-flicker {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--crt-flicker);
-      opacity: 0;
-      z-index: 9998;
-      pointer-events: none;
-      animation: flicker 0.15s infinite;
-    }
-
-    @keyframes flicker {
-      0% {
-        opacity: 0.1;
-      }
-
-      50% {
-        opacity: 0.02;
-      }
-
-      100% {
-        opacity: 0.1;
-      }
-    }
-
-    #scanline {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100px;
-      background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.03) 50%, rgba(255, 255, 255, 0));
-      z-index: 9997;
-      pointer-events: none;
-      animation: scanline 8s linear infinite;
-    }
-
-    @keyframes scanline {
-      0% {
-        top: -100px;
-      }
-
-      100% {
-        top: 100%;
-      }
-    }
-
-    /* --- Header UI --- */
-    #header {
-      height: 60px;
-      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-      display: flex;
-      align-items: center;
-      padding: 0 30px;
-      justify-content: space-between;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(5px);
-      z-index: 1000;
-    }
-
-    .header-item {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .level-badge {
-      background: var(--primary-amber);
-      color: black;
-      padding: 4px 12px;
-      font-weight: bold;
-      border-radius: 2px;
-    }
-
-    .zone-name {
-      color: var(--accent-cyan);
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      font-size: 14px;
-    }
-
-    #global-timer {
-      font-size: 18px;
-      color: var(--text-muted);
-    }
-
-    /* --- Main Content --- */
-    #game-container {
-      flex: 1;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 40px;
-    }
-
-    #zone-viewport {
-      width: 100%;
-      max-width: 1000px;
-      height: 100%;
-      max-height: 600px;
-      background: rgba(10, 10, 20, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
-    }
-
-    /* --- Shared Components --- */
-    .terminal-block {
-      padding: 20px;
-      font-size: 14px;
-      line-height: 1.5;
-      color: var(--terminal-green);
-      overflow-y: auto;
-      max-height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .code-block {
-      background: #000;
-      padding: 20px;
-      border-radius: 4px;
-      margin: 20px 0;
-      border-left: 4px solid var(--primary-amber);
-      white-space: pre;
-      font-size: 13px;
-    }
-
-    .input-area {
-      margin-top: 30px;
-      display: flex;
-      gap: 10px;
-    }
-
-    input[type="text"] {
-      background: transparent;
-      border: 1px solid var(--accent-cyan);
-      color: var(--accent-cyan);
-      padding: 10px 15px;
-      font-family: 'JetBrains Mono', monospace;
-      flex: 1;
-      outline: none;
-    }
-
-    button {
-      background: var(--accent-cyan);
-      color: black;
-      border: none;
-      padding: 10px 25px;
-      font-family: 'JetBrains Mono', monospace;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    button:hover {
-      filter: brightness(1.2);
-      box-shadow: 0 0 15px var(--accent-cyan);
-    }
-
-    /* --- Transitions & Cutscenes --- */
-    #transition-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: black;
-      z-index: 5000;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: white;
-    }
-
-    .glitch-text {
-      font-size: 40px;
-      font-weight: bold;
-      text-transform: uppercase;
-      position: relative;
-      animation: glitch 1s infinite;
-    }
-
-    @keyframes glitch {
-      0% {
-        transform: translate(0);
-      }
-
-      20% {
-        transform: translate(-2px, 2px);
-        color: var(--accent-cyan);
-      }
-
-      40% {
-        transform: translate(2px, -2px);
-        color: var(--primary-amber);
-      }
-
-      60% {
-        transform: translate(-2px, -2px);
-      }
-
-      80% {
-        transform: translate(2px, 2px);
-      }
-
-      100% {
-        transform: translate(0);
-      }
-    }
-
-    /* --- Zone Specifics --- */
-    .zone-1-theme {
-      color: var(--terminal-green);
-    }
-
-    .zone-2-theme {
-      color: var(--phantom-purple);
-    }
-
-    .zone-3-theme {
-      color: var(--ouro-emerald);
-    }
-
-    /* --- Extra Depth Effects --- */
-    #vignette {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle, transparent 50%, rgba(0,0,0,0.4) 100%);
-      pointer-events: none;
-      z-index: 10;
-    }
-
-    .chromatic-aberration {
-      animation: chromatic 0.2s infinite;
-    }
-
-    @keyframes chromatic {
-      0% { text-shadow: 1px 0 #f00, -1px 0 #0ff; }
-      50% { text-shadow: -1px 0 #f00, 1px 0 #0ff; }
-      100% { text-shadow: 1px 0 #f00, -1px 0 #0ff; }
-    }
-
-    .ui-shake {
-      animation: ui-shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
-    }
-
-    .glitch-veil {
-      animation: glitch-veil 0.2s infinite;
-      filter: contrast(150%) brightness(120%) hue-rotate(90deg) saturate(200%);
-      opacity: 0.7;
-    }
-
-    .rewind-glitch {
-      animation: neon-flicker 0.05s infinite;
-      filter: contrast(200%) brightness(150%);
-      background: repeating-linear-gradient(0deg, rgba(255,0,255,0.1), rgba(0,255,255,0.1) 2px, transparent 2px, transparent 4px);
-    }
-
-    @keyframes neon-flicker {
-      0% { box-shadow: inset 0 0 50px #ff00ff, 0 0 20px #00ffff; background: rgba(255,0,255,0.1); }
-      33% { box-shadow: inset 0 0 50px #00ffff, 0 0 20px #00ff00; background: rgba(0,255,255,0.1); }
-      66% { box-shadow: inset 0 0 50px #00ff00, 0 0 20px #ff00ff; background: rgba(0,255,0,0.1); }
-      100% { box-shadow: inset 0 0 50px #ff00ff, 0 0 20px #00ffff; background: rgba(255,0,255,0.1); }
-    }
-
-    @keyframes glitch-veil {
-      0% { transform: translate(0) scale(1); }
-      20% { transform: translate(-5px, 5px) scale(1.02); }
-      40% { transform: translate(5px, -5px) scale(0.98); }
-      60% { transform: translate(-2px, -2px) scale(1.05); }
-      80% { transform: translate(2px, 2px) scale(0.95); }
-      100% { transform: translate(0) scale(1); }
-    }
-
-    @keyframes ui-shake {
-      10%, 90% { transform: translate3d(-1px, 0, 0); }
-      20%, 80% { transform: translate3d(2px, 0, 0); }
-      30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-      40%, 60% { transform: translate3d(4px, 0, 0); }
-    }
-
-    #rage-bait-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(255, 0, 0, 0.4);
-      backdrop-filter: blur(10px);
-      z-index: 10000;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      color: white;
-      pointer-events: none;
-    }
-
-    .rage-text {
-      font-size: 80px;
-      font-weight: 900;
-      color: #FF0000;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      font-family: 'Arial', sans-serif;
-    }
-  </style>
-</head>
-
-<body>
-  <div id="crt-overlay"></div>
-  <div id="crt-flicker"></div>
-  <div id="scanline"></div>
-
-  <div id="header">
-    <div class="header-item">
-      <div id="level-display" class="level-badge">LEVEL 21 / 25</div>
-      <div id="zone-display" class="zone-name">COMPILE OR DIE</div>
-      <button id="btn-back-to-menu" style="background: transparent; border: 1px solid var(--accent-cyan); color: var(--accent-cyan); padding: 4px 12px; cursor: pointer; font-size: 13px; font-family: 'JetBrains Mono', monospace; font-weight: bold; border-radius: 2px; transition: all 0.2s;">BACK TO MENU</button>
-    </div>
-    <div id="global-timer">00:00:00</div>
-  </div>
-
-  <div id="game-container">
-    <div id="zone-viewport">
-      <div id="vignette"></div>
-      <!-- Content dynamically injected here -->
-      <div id="view-content" style="width:100%; height:100%;"></div>
-    </div>
-  </div>
-
-  <div id="transition-overlay">
-    <div class="glitch-text" id="transition-title">INITIALIZING...</div>
-    <div style="margin-top:20px; color:var(--text-muted);" id="transition-subtitle">ACCESSING SECURE LAYER</div>
-  </div>
-
-  <div id="rage-bait-overlay">
-    <div class="rage-text" id="rage-message">SKILL ISSUE</div>
-    <div style="margin-top:20px; font-size:20px; font-weight:bold;">GET GUD OR GET OUT</div>
-  </div>
-
-  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-  <script>
     // --- GAME ENGINE ---
     const Game = {
       state: {
@@ -618,10 +183,17 @@
 
       init() {
         const savedTeam = sessionStorage.getItem('blockly_session');
+        let parsedTeam = null;
         if (savedTeam) {
-            const { name, id } = JSON.parse(savedTeam);
-            this.teamId = id;
-            this.teamName = name;
+            try {
+                parsedTeam = JSON.parse(savedTeam);
+            } catch (e) {
+                console.error("Error parsing blockly_session:", e);
+            }
+        }
+        if (parsedTeam) {
+            this.teamId = parsedTeam.id;
+            this.teamName = parsedTeam.name;
         } else {
             this.teamId = 'TEAM-' + Math.random().toString(36).substr(2, 9);
             this.teamName = "PLAYER";
@@ -634,7 +206,7 @@
         const startLevel = levelParam ? parseInt(levelParam) : 11;
 
         // Add back to menu listener
-        const btnBack = document.getElementById('btn-back-menu');
+        const btnBack = document.getElementById('btn-back-to-menu');
         if (btnBack) {
           btnBack.addEventListener('click', () => {
             if (window.parent && window.parent.exitSpectrumPhase) {
@@ -672,7 +244,7 @@
                         <p style="color:var(--text-muted); margin-bottom:40px;">// SPECTRUM SECURE ACCESS TERMINAL</p>
                         
                         <div style="display:flex; flex-direction:column; gap:15px; align-items:center;">
-                            <button onclick="Game.loadLevel(11)" style="width:250px;">ENTER SYSTEM</button>
+                            <button onclick="Game.loadLevel(Game.state.level)" style="width:250px;">ENTER SYSTEM</button>
                             <button onclick="Game.showLevelSelect()" style="width:250px; background:var(--text-muted);">LEVEL SELECT</button>
                         </div>
 
@@ -696,7 +268,7 @@
             console.warn('localStorage is unavailable');
         }
 
-        for (let i = 11; i <= 20; i++) {
+        for (let i = 11; i <= 25; i++) {
           const isLocked = !this.state.isDevMode && i > Math.max(this.state.level, maxUnlocked);
           html += `
                         <button onclick="${isLocked ? '' : `Game.loadLevel(${i})`}" 
@@ -717,10 +289,8 @@
       },
 
       updateUI() {
-        const levelDisplay = document.getElementById('ui-level-display');
-        if (levelDisplay) {
-            levelDisplay.innerText = `LEVEL ${String(this.state.level).padStart(2, '0')} / 20 - ${this.zones[this.state.zone].name}`;
-        }
+        document.getElementById('level-display').innerText = `LEVEL ${String(this.state.level).padStart(2, '0')} / 25`;
+        document.getElementById('zone-display').innerText = this.zones[this.state.zone].name;
       },
 
       startTimer() {
@@ -772,21 +342,19 @@
 
       renderLevel() {
         const content = document.getElementById('view-content');
-        
-        if (this.state.level > 20) {
-            this.showVictoryScreen();
-            return;
-        }
-
         content.innerHTML = ''; 
 
-        // Check for saved custom layout for platformer levels
-        if (this.state.level >= 11) {
+        // Check for saved custom layout for platformer levels (21-25)
+        if (this.state.level >= 21) {
             const saved = localStorage.getItem(`saved_level_${this.state.level}`);
             if (saved) {
                 console.log(`[SYSTEM] LOADING PERSISTED LAYOUT FOR LEVEL ${this.state.level}`);
-                Platformer.init(content, JSON.parse(saved));
-                return;
+                try {
+                    Platformer.init(content, JSON.parse(saved));
+                    return;
+                } catch (e) {
+                    console.error("Error parsing saved level layout:", e);
+                }
             }
         }
 
@@ -820,6 +388,9 @@
         if (this.socket) {
             this.socket.emit('report_failure', { teamId: this.teamId });
         }
+        if (window.parent && window.parent.recordFailure) {
+            window.parent.recordFailure();
+        }
         const overlay = document.getElementById('rage-bait-overlay');
         const msg = document.getElementById('rage-message');
         msg.innerText = this.state.rageMessages[Math.floor(Math.random() * this.state.rageMessages.length)];
@@ -830,6 +401,9 @@
       },
 
       next() {
+        if (window.parent && window.parent.recordLevelSolved) {
+            window.parent.recordLevelSolved(this.state.level);
+        }
         if (this.state.level < 25) {
           this.loadLevel(this.state.level + 1);
         } else {
@@ -1012,12 +586,39 @@
       setupInputs() {
         window.onkeydown = (e) => {
           this.keys[e.code] = true;
-          if (Game.state.isDevMode) {
-            if (e.key.toLowerCase() === 'e') {
-              this.editor.active = !this.editor.active;
-              document.getElementById('editor-ui').style.display = this.editor.active ? 'block' : 'none';
-              
-              // Automatically persist custom layout and physics properties on closing editor (pressing E)
+          if (e.key.toLowerCase() === 'e') {
+            this.editor.active = !this.editor.active;
+            document.getElementById('editor-ui').style.display = this.editor.active ? 'block' : 'none';
+            
+            // Automatically persist custom layout and physics properties on closing editor (pressing E)
+            const levelId = Game.state.level;
+            const layout = {
+              platforms: this.platforms,
+              saws: this.saws,
+              lasers: this.lasers,
+              spikes: this.spikes,
+              orbs: this.orbs,
+              goal: this.goal,
+              spawnPos: this.spawnPos,
+              physics: {
+                gravity: this.gravity,
+                jump: this.jump,
+                maxSpeed: this.maxSpeed,
+                friction: this.friction,
+                timeScale: this.timeScale
+              }
+            };
+            localStorage.setItem(`saved_level_${levelId}`, JSON.stringify(layout));
+            console.log(`--- PERSISTED PHYSICS & LAYOUT LEVEL ${levelId} ON 'E' TOGGLE ---`);
+          }
+          if (this.editor.active) {
+            if (e.key.toLowerCase() === 't') {
+              const tools = ['platform', 'saw', 'laser', 'spike', 'spawn', 'orb', 'goal'];
+              const idx = (tools.indexOf(this.editor.tool) + 1) % tools.length;
+              this.editor.tool = tools[idx];
+              document.getElementById('tool-name').innerText = this.editor.tool.toUpperCase();
+            }
+            if (e.key.toLowerCase() === 's') {
               const levelId = Game.state.level;
               const layout = {
                 platforms: this.platforms,
@@ -1036,37 +637,8 @@
                 }
               };
               localStorage.setItem(`saved_level_${levelId}`, JSON.stringify(layout));
-              console.log(`--- PERSISTED PHYSICS & LAYOUT LEVEL ${levelId} ON 'E' TOGGLE ---`);
-            }
-            if (this.editor.active) {
-              if (e.key.toLowerCase() === 't') {
-                const tools = ['platform', 'saw', 'laser', 'spike', 'spawn', 'orb', 'goal'];
-                const idx = (tools.indexOf(this.editor.tool) + 1) % tools.length;
-                this.editor.tool = tools[idx];
-                document.getElementById('tool-name').innerText = this.editor.tool.toUpperCase();
-              }
-              if (e.key.toLowerCase() === 's') {
-                const levelId = Game.state.level;
-                const layout = {
-                  platforms: this.platforms,
-                  saws: this.saws,
-                  lasers: this.lasers,
-                  spikes: this.spikes,
-                  orbs: this.orbs,
-                  goal: this.goal,
-                  spawnPos: this.spawnPos,
-                  physics: {
-                    gravity: this.gravity,
-                    jump: this.jump,
-                    maxSpeed: this.maxSpeed,
-                    friction: this.friction,
-                    timeScale: this.timeScale
-                  }
-                };
-                localStorage.setItem(`saved_level_${levelId}`, JSON.stringify(layout));
-                console.log(`--- PERSISTED LEVEL ${levelId} TO STORAGE ---`);
-                alert(`LEVEL ${levelId} SAVED LOCALLY!`);
-              }
+              console.log(`--- PERSISTED LEVEL ${levelId} TO STORAGE ---`);
+              alert(`LEVEL ${levelId} SAVED LOCALLY!`);
             }
           }
         };
@@ -2086,13 +1658,60 @@ int fact(int n) {
           if (selected === correct) Game.next();
           else Game.fail();
         }
+      },
+      21: {
+        render(container) {
+          Platformer.init(container, {
+            platforms: [{ x: 0, y: 350, w: 150, h: 50 }, { x: 300, y: 250, w: 120, h: 20 }],
+            saws: [{ x: 200, y: 330, r: 25 }, { x: 260, y: 300, r: 25 }],
+            lasers: [{ x: 150, y: 370, w: 150, h: 10 }],
+            goal: { x: 360, y: 200, w: 30, h: 30 }
+          });
+        }
+      },
+      22: {
+        render(container) {
+          Platformer.init(container, {
+            platforms: [{ x: 0, y: 350, w: 80, h: 50 }, { x: 150, y: 300, w: 60, h: 20 }, { x: 280, y: 220, w: 60, h: 20 }, { x: 400, y: 280, w: 100, h: 50 }],
+            saws: [{ x: 240, y: 280, r: 20 }],
+            lasers: [{ x: 110, y: 0, w: 20, h: 400 }, { x: 250, y: 0, w: 20, h: 400 }, { x: 370, y: 0, w: 20, h: 400 }],
+            goal: { x: 440, y: 230, w: 30, h: 30 }
+          });
+        }
+      },
+      23: {
+        render(container) {
+          Platformer.init(container, {
+            platforms: [{ x: 0, y: 350, w: 80, h: 50 }, { x: 150, y: 350, w: 80, h: 50 }, { x: 300, y: 350, w: 80, h: 50 }, { x: 450, y: 350, w: 80, h: 50 }],
+            saws: [{ x: 110, y: 350, r: 35 }, { x: 260, y: 350, r: 35 }, { x: 410, y: 350, r: 35 }],
+            lasers: [{ x: 0, y: 180, w: 550, h: 10 }, { x: 0, y: 250, w: 550, h: 10 }],
+            goal: { x: 470, y: 300, w: 30, h: 30 }
+          });
+        }
+      },
+      24: {
+        render(container) {
+          Platformer.init(container, {
+            platforms: [{ x: 0, y: 350, w: 80, h: 50 }, { x: 500, y: 350, w: 100, h: 50 }],
+            saws: Array.from({ length: 4 }, (_, i) => ({ x: 150 + i * 90, y: 320 + Math.sin(i * 1.5) * 40, r: 25 })),
+            lasers: [{ x: 150, y: 150, w: 300, h: 10 }],
+            goal: { x: 530, y: 310, w: 30, h: 30 }
+          });
+        }
+      },
+      25: {
+        render(container) {
+          Platformer.init(container, {
+            platforms: [{ x: 0, y: 350, w: 80, h: 50 }, { x: 150, y: 280, w: 80, h: 20 }, { x: 300, y: 210, w: 80, h: 20 }, { x: 450, y: 280, w: 80, h: 20 }, { x: 600, y: 350, w: 80, h: 50 }],
+            lasers: [{ x: 240, y: 0, w: 10, h: 400 }, { x: 390, y: 0, w: 10, h: 400 }],
+            saws: [{ x: 240, y: 260, r: 18 }, { x: 390, y: 190, r: 18 }],
+            goal: { x: 630, y: 300, w: 30, h: 30 }
+          });
+        }
       }
     };
 
     // Initialize
     window.onload = () => Game.init();
 
-  </script>
-</body>
-
-</html>
+  
